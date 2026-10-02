@@ -19,5 +19,12 @@ Choices made where `IMPLEMENTATION_PLAN.md` left something open or where the rep
 - Emails are awaited inline, so the forgot-password response for a registered address is slightly slower than for an unknown one. Revisit when the email provider is chosen.
 - Unhandled errors are logged as the error type plus request id only, never the message, because driver messages can contain row data.
 - Integration tests (Phases 2 onward) are deferred until a test database is set up; unit tests are written but have not been run yet. Typecheck, lint and tests have not been run on any phase so far.
+- `environment_access` overrides apply to editors and viewers only. Admins and owners always have admin access, so an override can never lock a workspace manager out.
+- Non-members get `404 NOT_FOUND` for workspace and project routes (existence is not revealed); members with too low a role get `403 FORBIDDEN`. Unknown and foreign project ids return the same message.
+- Archived projects are hidden everywhere (`404`) and `resolveAccess` returns `none` for their environments. Their slug stays reserved.
+- Invitations can grant `admin`, `editor` or `viewer` only; `owner` is never assignable. They expire after 7 days, and acceptance requires the signed-in user's email to match the invited email. The owner cannot be removed or have their role changed.
+- The plan's API list has no endpoints for deleting a workspace, transferring ownership, or managing `environment_access` overrides, so none exist yet (override UI is Phase 10).
+- Every write route writes its audit entry in the same transaction as the change. Audit timestamps are set by the app at millisecond precision so pagination cursors are exact.
+- Project and workspace creation require an explicit `slug`; it is not derived from the name.
 - `IMPLEMENTATION_PLAN.md` is intentionally untracked (listed in `.gitignore`).
 - Commits are small and prefixed with the phase, e.g. `phase-0: Add Hono API skeleton`.
