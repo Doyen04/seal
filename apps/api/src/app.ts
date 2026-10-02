@@ -11,6 +11,8 @@ import { authenticate } from "./middleware/authenticate.js";
 import { requestId } from "./middleware/request-id.js";
 import { accountRoutes } from "./routes/account.js";
 import { authRoutes } from "./routes/auth.js";
+import { projectRoutes } from "./routes/projects.js";
+import { workspaceRoutes } from "./routes/workspaces.js";
 
 /**
  * Builds the API. `getDeps` is called lazily on the first request that needs
@@ -52,6 +54,8 @@ export function createApp(getDeps: () => Deps) {
 
   app.route("/auth", authRoutes);
   app.route("/", accountRoutes);
+  app.route("/", workspaceRoutes);
+  app.route("/", projectRoutes);
 
   app.notFound((c) =>
     c.json({ error: { code: "NOT_FOUND", message: "Not found" } }, 404),
