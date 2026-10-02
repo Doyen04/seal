@@ -1,5 +1,13 @@
 import { serve } from "@hono/node-server";
-import app from "./index.js";
+
+// Load local settings before anything reads process.env (Node 21.7+).
+try {
+  process.loadEnvFile(".env.local");
+} catch {
+  // no local env file
+}
+
+const { default: app } = await import("./index.js");
 
 const port = Number(process.env.PORT ?? 3001);
 

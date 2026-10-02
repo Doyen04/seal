@@ -12,6 +12,14 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+/** Thrown for bad configuration. Its message only ever contains variable names. */
+export class ConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConfigError";
+  }
+}
+
 /**
  * Validates environment variables. The error lists variable names only,
  * never their values.
@@ -20,7 +28,9 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
   const result = envSchema.safeParse(source);
   if (!result.success) {
     const names = [...new Set(result.error.issues.map((i) => String(i.path[0])))];
-    throw new Error(`Invalid or missing environment variables: ${names.join(", ")}`);
+    throw new ConfigError(
+      `Invalid or missing environment variables: ${names.join(", ")}`,
+    );
   }
   return result.data;
 }
