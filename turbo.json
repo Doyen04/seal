@@ -17,6 +17,7 @@
       "outputs": ["coverage/**"]
     },
     "dev": {
+      "env": ["PORT"],
       "cache": false,
       "persistent": true
     }
