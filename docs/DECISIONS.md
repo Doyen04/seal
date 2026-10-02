@@ -26,5 +26,12 @@ Choices made where `IMPLEMENTATION_PLAN.md` left something open or where the rep
 - The plan's API list has no endpoints for deleting a workspace, transferring ownership, or managing `environment_access` overrides, so none exist yet (override UI is Phase 10).
 - Every write route writes its audit entry in the same transaction as the change. Audit timestamps are set by the app at millisecond precision so pagination cursors are exact.
 - Project and workspace creation require an explicit `slug`; it is not derived from the name.
+- All secret writes go through `applySecretChange` in `apps/api/src/lib/secrets.ts`. Each write transaction starts by incrementing `environments.change_seq`, which locks the environment row, so writers are serialized per environment and `seq` is strictly increasing with no gaps (a rolled-back write also rolls back its increment).
+- `baseVersion` is compared against the stored version, where a missing key counts as `0` and a soft-deleted key keeps the version of its delete. So a stale client cannot resurrect a deleted key without a conflict, and `baseVersion: 0` on a tombstone conflicts. Omitting `baseVersion` is last-write-wins.
+- Deleting a key that is missing or already deleted returns `404`. A delete keeps the last ciphertext on the row and in the version row (the columns are NOT NULL), so deleted values stay in the database until a purge job exists.
+- Rollback decrypts the chosen version and re-encrypts it with a fresh DEK and the current master key. Rolling back to a delete version is rejected; rolling back a deleted key revives it.
+- Bulk import is one transaction with one audit entry (`secrets.bulk_write`, listing keys and versions, never values), capped at 500 items per request with unique keys.
+- `GET /export` reads `seq` and all secrets in one repeatable-read transaction and is rate limited to 120 per minute per principal. Single value reads, exports and decrypt failures are audited; a failed decrypt returns a plain 500.
+- Metadata and version listings select no ciphertext columns. Secret-by-id routes return the same `404` for unknown ids and ids the caller cannot access.
 - `IMPLEMENTATION_PLAN.md` is intentionally untracked (listed in `.gitignore`).
 - Commits are small and prefixed with the phase, e.g. `phase-0: Add Hono API skeleton`.
