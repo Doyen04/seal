@@ -42,6 +42,32 @@ export async function parseJson<T extends z.ZodType>(
   return result.data;
 }
 
+/** Like `parseJson`, but an empty body is treated as `{}`. */
+export async function parseOptionalJson<T extends z.ZodType>(
+  c: Context,
+  schema: T,
+): Promise<z.infer<T>> {
+  const text = await c.req.text();
+  let raw: unknown = {};
+  if (text.trim() !== "") {
+    try {
+      raw = JSON.parse(text);
+    } catch {
+      throw validationError("Request body must be valid JSON");
+    }
+  }
+  const result = schema.safeParse(raw);
+  if (!result.success) {
+    throw validationError("Invalid request", {
+      issues: result.error.issues.map((issue) => ({
+        path: issue.path.join("."),
+        message: issue.message,
+      })),
+    });
+  }
+  return result.data;
+}
+
 /** Parses and validates the query string. */
 export function parseQuery<T extends z.ZodType>(
   c: Context,
