@@ -6,18 +6,18 @@ This is a pnpm + Turborepo monorepo.
 
 ## Layout
 
-| Path | Purpose |
-| --- | --- |
-| `apps/web` | Next.js dashboard |
-| `apps/api` | Hono API (`/v1`) |
-| `apps/desktop` | Placeholder, built later |
-| `packages/core` | Shared zod schemas, types, error codes, API client |
-| `packages/crypto` | Envelope encryption, `KeyProvider`, token helpers |
-| `packages/db` | Drizzle schema and migrations |
-| `packages/cli` | The `seal` command |
-| `packages/sdk` | Runtime library for deployed apps |
-| `packages/ui` | Shared React components |
-| `packages/eslint-config`, `packages/typescript-config` | Shared tooling config |
+| Path                                                   | Purpose                                            |
+| ------------------------------------------------------ | -------------------------------------------------- |
+| `apps/web`                                             | Next.js dashboard                                  |
+| `apps/api`                                             | Hono API (`/v1`)                                   |
+| `apps/desktop`                                         | Placeholder, built later                           |
+| `packages/core`                                        | Shared zod schemas, types, error codes, API client |
+| `packages/crypto`                                      | Envelope encryption, `KeyProvider`, token helpers  |
+| `packages/db`                                          | Drizzle schema and migrations                      |
+| `packages/cli`                                         | The `seal` command                                 |
+| `packages/sdk`                                         | Runtime library for deployed apps                  |
+| `packages/ui`                                          | Shared React components                            |
+| `packages/eslint-config`, `packages/typescript-config` | Shared tooling config                              |
 
 Design decisions are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 

@@ -5,7 +5,7 @@ import { createApiClient, type ApiClient } from "@repo/core";
  * Next.js automatically appends session cookies when communicating with `/api/proxy`.
  */
 export const client: ApiClient = createApiClient({
-  baseUrl: "/api/proxy",
+    baseUrl: "/api/proxy",
 });
 
 export { ApiError } from "@repo/core";

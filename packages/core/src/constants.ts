@@ -28,9 +28,9 @@ export const SYNC_JOB_STATUSES = ["queued", "running", "done", "failed"] as cons
 export type SyncJobStatus = (typeof SYNC_JOB_STATUSES)[number];
 
 export const DEFAULT_ENVIRONMENTS = [
-  { name: "Development", slug: "development" },
-  { name: "Staging", slug: "staging" },
-  { name: "Production", slug: "production" },
+    { name: "Development", slug: "development" },
+    { name: "Staging", slug: "staging" },
+    { name: "Production", slug: "production" },
 ] as const;
 
 export const DEFAULT_OFFLINE_MAX_AGE_HOURS = 72;

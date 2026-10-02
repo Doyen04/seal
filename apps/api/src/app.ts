@@ -23,67 +23,61 @@ import { workspaceRoutes } from "./routes/workspaces.js";
  * authorize (per route), handler.
  */
 export function createApp(getDeps: () => Deps) {
-  const app = new Hono<AppEnv>().basePath("/v1");
+    const app = new Hono<AppEnv>().basePath("/v1");
 
-  app.use(requestId);
-  app.use(async (c, next) => {
-    c.header("Cache-Control", "no-store");
-    await next();
-  });
+    app.use(requestId);
+    app.use(async (c, next) => {
+        c.header("Cache-Control", "no-store");
+        await next();
+    });
 
-  // Registered before the deps/auth middleware on purpose: no auth, no DB.
-  app.get("/health", (c) => c.json({ ok: true }));
+    // Registered before the deps/auth middleware on purpose: no auth, no DB.
+    app.get("/health", (c) => c.json({ ok: true }));
 
-  app.use(async (c, next) => {
-    c.set("deps", getDeps());
-    c.set("ip", getClientIp(c));
-    c.set("principal", null);
-    await next();
-  });
+    app.use(async (c, next) => {
+        c.set("deps", getDeps());
+        c.set("ip", getClientIp(c));
+        c.set("principal", null);
+        await next();
+    });
 
-  app.use(
-    cors({
-      origin: (origin, c) =>
-        origin === new URL(c.get("deps").env.WEB_ORIGIN).origin ? origin : null,
-      credentials: true,
-      allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowHeaders: ["Content-Type", "Authorization"],
-    }),
-  );
-
-  app.use(authenticate);
-
-  app.route("/auth", authRoutes);
-  app.route("/", accountRoutes);
-  app.route("/", workspaceRoutes);
-  app.route("/", projectRoutes);
-  app.route("/", secretRoutes);
-
-  app.notFound((c) =>
-    c.json({ error: { code: "NOT_FOUND", message: "Not found" } }, 404),
-  );
-
-  app.onError((err, c) => {
-    if (err instanceof AppError) {
-      return c.json(err.toBody(), err.status as ContentfulStatusCode, err.headers);
-    }
-    if (err instanceof HTTPException) {
-      return err.getResponse();
-    }
-    // Log the error type only: messages from drivers can contain row data.
-    // Configuration errors are safe to print (they list variable names).
-    console.error(
-      JSON.stringify({
-        requestId: c.get("requestId"),
-        error: err.name,
-        ...(err instanceof ConfigError ? { message: err.message } : {}),
-      }),
+    app.use(
+        cors({
+            origin: (origin, c) => (origin === new URL(c.get("deps").env.WEB_ORIGIN).origin ? origin : null),
+            credentials: true,
+            allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+            allowHeaders: ["Content-Type", "Authorization"],
+        }),
     );
-    return c.json(
-      { error: { code: "INTERNAL", message: "Internal server error" } },
-      500,
-    );
-  });
 
-  return app;
+    app.use(authenticate);
+
+    app.route("/auth", authRoutes);
+    app.route("/", accountRoutes);
+    app.route("/", workspaceRoutes);
+    app.route("/", projectRoutes);
+    app.route("/", secretRoutes);
+
+    app.notFound((c) => c.json({ error: { code: "NOT_FOUND", message: "Not found" } }, 404));
+
+    app.onError((err, c) => {
+        if (err instanceof AppError) {
+            return c.json(err.toBody(), err.status as ContentfulStatusCode, err.headers);
+        }
+        if (err instanceof HTTPException) {
+            return err.getResponse();
+        }
+        // Log the error type only: messages from drivers can contain row data.
+        // Configuration errors are safe to print (they list variable names).
+        console.error(
+            JSON.stringify({
+                requestId: c.get("requestId"),
+                error: err.name,
+                ...(err instanceof ConfigError ? { message: err.message } : {}),
+            }),
+        );
+        return c.json({ error: { code: "INTERNAL", message: "Internal server error" } }, 500);
+    });
+
+    return app;
 }

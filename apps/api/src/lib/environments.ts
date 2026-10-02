@@ -5,12 +5,12 @@ import { forbidden, notFound, unauthenticated } from "../errors.js";
 import { accessAtLeast, resolveAccess, type AccessLevel } from "./access.js";
 
 export interface EnvironmentContext {
-  id: string;
-  projectId: string;
-  workspaceId: string;
-  offlineMaxAgeHours: number;
-  /** The caller's resolved access level on this environment. */
-  access: AccessLevel;
+    id: string;
+    projectId: string;
+    workspaceId: string;
+    offlineMaxAgeHours: number;
+    /** The caller's resolved access level on this environment. */
+    access: AccessLevel;
 }
 
 /**
@@ -20,31 +20,31 @@ export interface EnvironmentContext {
  * the required level gets FORBIDDEN.
  */
 export async function authorizeEnvironment(
-  c: Context<AppEnv>,
-  environmentId: string,
-  min: Exclude<AccessLevel, "none">,
-  notFoundMessage = "Environment not found",
+    c: Context<AppEnv>,
+    environmentId: string,
+    min: Exclude<AccessLevel, "none">,
+    notFoundMessage = "Environment not found",
 ): Promise<EnvironmentContext> {
-  const principal = c.get("principal");
-  if (!principal) throw unauthenticated();
-  const { db } = c.get("deps");
+    const principal = c.get("principal");
+    if (!principal) throw unauthenticated();
+    const { db } = c.get("deps");
 
-  const access = await resolveAccess(db, principal, environmentId);
-  if (access === "none") throw notFound(notFoundMessage);
-  if (!accessAtLeast(access, min)) throw forbidden();
+    const access = await resolveAccess(db, principal, environmentId);
+    if (access === "none") throw notFound(notFoundMessage);
+    if (!accessAtLeast(access, min)) throw forbidden();
 
-  const [row] = await db
-    .select({
-      id: environments.id,
-      projectId: environments.projectId,
-      workspaceId: projects.workspaceId,
-      offlineMaxAgeHours: projects.offlineMaxAgeHours,
-    })
-    .from(environments)
-    .innerJoin(projects, eq(projects.id, environments.projectId))
-    .where(eq(environments.id, environmentId))
-    .limit(1);
-  if (!row) throw notFound(notFoundMessage);
+    const [row] = await db
+        .select({
+            id: environments.id,
+            projectId: environments.projectId,
+            workspaceId: projects.workspaceId,
+            offlineMaxAgeHours: projects.offlineMaxAgeHours,
+        })
+        .from(environments)
+        .innerJoin(projects, eq(projects.id, environments.projectId))
+        .where(eq(environments.id, environmentId))
+        .limit(1);
+    if (!row) throw notFound(notFoundMessage);
 
-  return { ...row, access };
+    return { ...row, access };
 }
