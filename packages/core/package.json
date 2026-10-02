@@ -4,7 +4,9 @@
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./constants": "./src/constants.ts",
+    "./id": "./src/id.ts"
   },
   "scripts": {
     "lint": "eslint --max-warnings 0",
