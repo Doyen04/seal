@@ -11,6 +11,14 @@ export {
   type KeyProvider,
 } from "./key-provider.js";
 export {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  hashPassword,
+  validatePassword,
+  verifyPassword,
+  type PasswordCheck,
+} from "./passwords.js";
+export {
   generateToken,
   hashesEqual,
   hashToken,
