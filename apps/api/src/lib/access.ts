@@ -140,18 +140,19 @@ export async function requireWorkspaceRole(
   c: Context<AppEnv>,
   workspaceId: string,
   min: Role,
+  notFoundMessage = "Workspace not found",
 ): Promise<{ userId: string; role: Role }> {
   const principal = c.get("principal");
   if (!principal) throw unauthenticated();
   if (principal.type === "service_token") throw forbidden();
-  if (!isUuid(workspaceId)) throw notFound("Workspace not found");
+  if (!isUuid(workspaceId)) throw notFound(notFoundMessage);
 
   const role = await getMemberRole(
     c.get("deps").db,
     principal.userId,
     workspaceId,
   );
-  if (role === null) throw notFound("Workspace not found");
+  if (role === null) throw notFound(notFoundMessage);
   if (!roleAtLeast(role, min)) throw forbidden();
 
   return { userId: principal.userId, role };

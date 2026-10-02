@@ -42,6 +42,23 @@ export async function parseJson<T extends z.ZodType>(
   return result.data;
 }
 
+/** Parses and validates the query string. */
+export function parseQuery<T extends z.ZodType>(
+  c: Context,
+  schema: T,
+): z.infer<T> {
+  const result = schema.safeParse(c.req.query());
+  if (!result.success) {
+    throw validationError("Invalid query parameters", {
+      issues: result.error.issues.map((issue) => ({
+        path: issue.path.join("."),
+        message: issue.message,
+      })),
+    });
+  }
+  return result.data;
+}
+
 export function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
     value,

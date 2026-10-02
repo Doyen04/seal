@@ -18,6 +18,20 @@ export function verifyEmailMessage(
   };
 }
 
+export function invitationMessage(
+  to: string,
+  webOrigin: string,
+  token: string,
+  workspaceName: string,
+  role: string,
+): EmailMessage {
+  return {
+    to,
+    subject: `You have been invited to ${workspaceName} on seal`,
+    text: `You have been invited to join the "${workspaceName}" workspace on seal as ${role}.\n\nAccept the invitation:\n${link(webOrigin, "/invitations/accept", token)}\n\nThis invitation expires in 7 days. Sign in or create an account with this email address to accept it.`,
+  };
+}
+
 export function resetPasswordMessage(
   to: string,
   webOrigin: string,
