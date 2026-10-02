@@ -1,3 +1,4 @@
+import { SESSION_COOKIE_NAME } from "@repo/core";
 import { hashesEqual, hashToken, tokenKindFromPrefix } from "@repo/crypto";
 import {
   and,
@@ -15,7 +16,7 @@ import { createMiddleware } from "hono/factory";
 import type { AppEnv, Principal, PrincipalType } from "../context.js";
 import { AppError, forbidden, unauthenticated } from "../errors.js";
 
-export const SESSION_COOKIE = "seal_session";
+export const SESSION_COOKIE = SESSION_COOKIE_NAME;
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const LAST_SEEN_THROTTLE_MS = 60_000;
