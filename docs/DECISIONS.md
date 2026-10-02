@@ -8,5 +8,7 @@ Choices made where `IMPLEMENTATION_PLAN.md` left something open or where the rep
 - Shared tsconfig presets live in `@repo/typescript-config` instead of a root `tsconfig.base.json`.
 - `apps/web` uses a `src/` directory (`src/app`, `src/components`, `src/lib`).
 - Email provider is not chosen. Sending goes through an `EmailSender` interface; dev and tests use a console sender. Must be decided before Phase 2 ends.
+- Postgres driver is `pg` (node-postgres) with Drizzle's `node-postgres` adapter. It works with Neon's pooled connection string and with a plain local Postgres for integration tests.
+- IDs are UUIDv7 generated in application code by `newId()` in `@repo/core` (no dependency), not by the database.
 - `IMPLEMENTATION_PLAN.md` is intentionally untracked (listed in `.gitignore`).
 - Commits are small and prefixed with the phase, e.g. `phase-0: Add Hono API skeleton`.
