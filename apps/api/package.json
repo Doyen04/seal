@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "@hono/node-server": "2.1.3",
-    "hono": "4.13.12"
+    "@repo/core": "workspace:*",
+    "@repo/crypto": "workspace:*",
+    "@repo/db": "workspace:*",
+    "hono": "4.13.12",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
