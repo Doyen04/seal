@@ -12,6 +12,7 @@ import { requestId } from "./middleware/request-id.js";
 import { accountRoutes } from "./routes/account.js";
 import { authRoutes } from "./routes/auth.js";
 import { projectRoutes } from "./routes/projects.js";
+import { secretRoutes } from "./routes/secrets.js";
 import { workspaceRoutes } from "./routes/workspaces.js";
 
 /**
@@ -56,6 +57,7 @@ export function createApp(getDeps: () => Deps) {
   app.route("/", accountRoutes);
   app.route("/", workspaceRoutes);
   app.route("/", projectRoutes);
+  app.route("/", secretRoutes);
 
   app.notFound((c) =>
     c.json({ error: { code: "NOT_FOUND", message: "Not found" } }, 404),
