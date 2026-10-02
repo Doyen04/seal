@@ -1,4 +1,5 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
+import type { PgDatabase } from "drizzle-orm/pg-core";
 import { Pool } from "pg";
 import * as schema from "./schema.js";
 
@@ -15,3 +16,6 @@ export function createDb(connectionString: string, options: CreateDbOptions = {}
 }
 
 export type Database = ReturnType<typeof createDb>;
+
+/** Either the database or a transaction, so helpers work inside both. */
+export type Executor = PgDatabase<NodePgQueryResultHKT, typeof schema>;
