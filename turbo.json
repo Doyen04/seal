@@ -4,6 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": ["API_URL", "WEB_ORIGIN"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
@@ -17,7 +18,7 @@
       "outputs": ["coverage/**"]
     },
     "dev": {
-      "env": ["PORT"],
+      "env": ["PORT", "API_URL", "WEB_ORIGIN"],
       "cache": false,
       "persistent": true
     }
