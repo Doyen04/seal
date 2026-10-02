@@ -5,4 +5,5 @@ export { newId } from "./id.js";
 export * from "./schemas/auth.js";
 export * from "./schemas/common.js";
 export * from "./schemas/secrets.js";
+export * from "./schemas/tokens.js";
 export * from "./schemas/workspaces.js";

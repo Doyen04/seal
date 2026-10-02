@@ -22,6 +22,11 @@ import type {
   SecretWriteResultDto,
 } from "./schemas/secrets.js";
 import type {
+  CreateServiceTokenInput,
+  CreateServiceTokenResponse,
+  ServiceTokenDto,
+} from "./schemas/tokens.js";
+import type {
   AuditPageDto,
   AuditQuery,
   CreateEnvironmentInput,
@@ -258,6 +263,14 @@ export function createApiClient(options: ApiClientOptions) {
       get<{ versions: SecretVersionDto[] }>(`/secrets/${enc(secretId)}/versions`),
     rollbackSecret: (secretId: string, version: number) =>
       post<SecretWriteResultDto>(`/secrets/${enc(secretId)}/rollback`, { version }),
+
+    // Service tokens
+    createServiceToken: (environmentId: string, input: CreateServiceTokenInput) =>
+      post<CreateServiceTokenResponse>(`/environments/${enc(environmentId)}/tokens`, input),
+    listServiceTokens: (environmentId: string) =>
+      get<{ tokens: ServiceTokenDto[] }>(`/environments/${enc(environmentId)}/tokens`),
+    revokeServiceToken: (tokenId: string) =>
+      del<Ok>(`/tokens/${enc(tokenId)}`),
   };
 }
 

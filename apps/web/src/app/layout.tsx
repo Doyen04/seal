@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -16,8 +18,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "seal",
-  description: "Secrets vault for developers",
+  title: "seal | Developer Secrets Manager",
+  description: "Secure, developer-first secrets vault and environment sync",
 };
 
 export default function RootLayout({
@@ -26,9 +28,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster position="top-right" richColors />
+        </ThemeProvider>
       </body>
     </html>
   );
