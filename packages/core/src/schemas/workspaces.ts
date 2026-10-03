@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { emailSchema, emailTokenSchema } from "./common.js";
+import { emailSchema, emailTokenSchema } from "./common";
 
 /** Lowercase letters, digits and hyphens, 2 to 40 characters. */
 export const slugSchema = z

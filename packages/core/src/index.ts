@@ -1,9 +1,10 @@
-export * from "./client.js";
-export * from "./constants.js";
-export * from "./errors.js";
-export { newId } from "./id.js";
-export * from "./schemas/auth.js";
-export * from "./schemas/common.js";
-export * from "./schemas/secrets.js";
-export * from "./schemas/tokens.js";
-export * from "./schemas/workspaces.js";
+export * from "./client";
+export * from "./constants";
+export * from "./errors";
+export { newId } from "./id";
+export * from "./schemas/auth";
+export * from "./schemas/common";
+export * from "./schemas/secrets";
+export * from "./schemas/tokens";
+export * from "./schemas/workspaces";
+

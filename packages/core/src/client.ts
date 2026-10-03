@@ -1,5 +1,5 @@
-import type { ApiErrorBody, ErrorCode } from "./errors.js";
-import { isErrorCode } from "./errors.js";
+import type { ApiErrorBody, ErrorCode } from "./errors";
+import { isErrorCode } from "./errors";
 import type {
     DeviceDto,
     DeviceLoginInput,
@@ -11,7 +11,7 @@ import type {
     SignupInput,
     UserDto,
     VerifyEmailInput,
-} from "./schemas/auth.js";
+} from "./schemas/auth";
 import type {
     BulkSecretsInput,
     BulkWriteResponse,
@@ -20,8 +20,8 @@ import type {
     SecretValueDto,
     SecretVersionDto,
     SecretWriteResultDto,
-} from "./schemas/secrets.js";
-import type { CreateServiceTokenInput, CreateServiceTokenResponse, ServiceTokenDto } from "./schemas/tokens.js";
+} from "./schemas/secrets";
+import type { CreateServiceTokenInput, CreateServiceTokenResponse, ServiceTokenDto } from "./schemas/tokens";
 import type {
     AuditPageDto,
     AuditQuery,
@@ -38,7 +38,7 @@ import type {
     UpdateMemberInput,
     UpdateProjectInput,
     WorkspaceDto,
-} from "./schemas/workspaces.js";
+} from "./schemas/workspaces";
 
 export const SESSION_COOKIE_NAME = "seal_session";
 
