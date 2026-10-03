@@ -18,7 +18,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-    title: "seal | Developer Secrets Manager",
+    title: "Seal | Developer Secrets Manager",
     description: "Secure, developer-first secrets vault and environment sync",
 };
 

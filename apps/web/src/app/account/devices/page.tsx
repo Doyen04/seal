@@ -108,7 +108,7 @@ export default function AccountDevicesPage() {
                                         <Laptop className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
                                         <p className="font-medium text-foreground">No active devices</p>
                                         <p className="text-xs mt-1">
-                                            Log in via CLI (`seal login`) to connect a device.
+                                            Log in via CLI (`Seal login`) to connect a device.
                                         </p>
                                     </TableCell>
                                 </TableRow>

@@ -6,7 +6,7 @@ const envSchema = z.object({
     MASTER_KEYS: z.string().min(1),
     MASTER_KEY_CURRENT: z.string().min(1),
     WEB_ORIGIN: z.url(),
-    EMAIL_FROM: z.string().min(1).default("seal <no-reply@localhost>"),
+    EMAIL_FROM: z.string().min(1).default("Seal <no-reply@localhost>"),
     CRON_SECRET: z.string().min(1).optional(),
 });
 

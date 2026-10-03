@@ -71,7 +71,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                         <div className="h-9 w-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
                             <Lock className="h-5 w-5" />
                         </div>
-                        <span className="font-bold text-xl tracking-tight">seal</span>
+                        <span className="font-bold text-xl tracking-tight">Seal</span>
                     </Link>
 
                     <span className="text-muted-foreground/30 font-light text-lg">/</span>

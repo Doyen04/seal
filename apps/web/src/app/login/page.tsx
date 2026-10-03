@@ -51,7 +51,7 @@ export default function LoginPage() {
                     <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-lg shadow-primary/5">
                         <Lock className="h-6 w-6" />
                     </div>
-                    <h1 className="text-2xl font-bold tracking-tight">Sign in to seal</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">Sign in to Seal</h1>
                     <p className="text-sm text-muted-foreground">Access your developer secrets vault</p>
                 </div>
 
