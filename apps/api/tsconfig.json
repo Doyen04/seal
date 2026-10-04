@@ -3,6 +3,8 @@
   "compilerOptions": {
     "lib": ["es2023"],
     "types": ["node"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "noEmit": true
   },
   "include": ["src"],
