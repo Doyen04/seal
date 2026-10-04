@@ -34,9 +34,14 @@ pnpm build
 pnpm lint
 pnpm check-types
 pnpm test
+pnpm db:migrate   # apply Drizzle migrations to Neon
 ```
 
 Filter to one package with `pnpm exec turbo <task> --filter=<package>`.
+
+Local env lives in each app's `.env.local` (copy from `.env.example`). `pnpm db:migrate`
+reads `apps/api/.env.local` through `dotenv`, so no shell exports are needed. On CI and
+Vercel there is no env file, so set the variables in the environment instead.
 
 ## Deploy
 

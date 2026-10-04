@@ -1,11 +1,11 @@
 import { serve } from "@hono/node-server";
+import { config as loadEnvFile } from "dotenv";
 
-// Load local settings before anything reads process.env (Node 21.7+).
-try {
-    process.loadEnvFile(".env.local");
-} catch {
-    // no local env file
-}
+// Turborepo does not load .env files into a task's runtime, and Strict Mode
+// passes only the variables declared for this task, so the file is loaded here.
+// Resolved from this module rather than process.cwd(). dotenv does not override
+// variables that are already set, so a shell export still wins.
+loadEnvFile({ path: new URL("../.env.local", import.meta.url), quiet: true });
 
 const { default: app } = await import("./index.js");
 

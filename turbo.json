@@ -17,6 +17,10 @@
     "test": {
       "outputs": ["coverage/**"]
     },
+    "db:migrate": {
+      "cache": false,
+      "passThroughEnv": ["DATABASE_URL", "DATABASE_URL_UNPOOLED"]
+    },
     "dev": {
       "env": ["PORT", "API_URL", "WEB_ORIGIN"],
       "cache": false,
