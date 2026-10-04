@@ -1,9 +1,7 @@
 import { createApiClient } from "@repo/core";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-const API_URL = process.env.API_URL || "http://localhost:3000/v1";
-const WEB_ORIGIN = process.env.WEB_ORIGIN || "http://localhost:3000";
+import { apiBaseUrl, webOrigin } from "@/lib/server-api";
 
 export async function POST() {
     try {
@@ -12,9 +10,9 @@ export async function POST() {
 
         if (sessionToken) {
             const client = createApiClient({
-                baseUrl: API_URL,
+                baseUrl: apiBaseUrl(),
                 sessionToken,
-                origin: WEB_ORIGIN,
+                origin: webOrigin(),
             });
             await client.logout().catch(() => {});
         }

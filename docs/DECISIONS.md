@@ -35,3 +35,9 @@ Choices made where `IMPLEMENTATION_PLAN.md` left something open or where the rep
 - Metadata and version listings select no ciphertext columns. Secret-by-id routes return the same `404` for unknown ids and ids the caller cannot access.
 - `IMPLEMENTATION_PLAN.md` is intentionally untracked (listed in `.gitignore`).
 - Commits are small and prefixed with the phase, e.g. `phase-0: Add Hono API skeleton`.
+- Deployment is one Vercel project with two services, declared in the root `vercel.json`: `api` (`apps/api`) and `web` (`apps/web`). They share one domain and one set of environment variables.
+- The API is public at `/api/v1`; every other path goes to the web app. The rewrite source is `/api/v1/(.*)` and not `/api/(.*)` on purpose: routing into a service is final, so a broader rewrite would shadow the web app's own `/api/proxy` and `/api/auth` route handlers.
+- The `api` service strips the public `/api` prefix with a `request.path` transform, so its Hono `basePath("/v1")` is unchanged. Internal calls arrive as `/v1/...`, which matches the same routes, so public and internal traffic share one set of paths.
+- The web app calls the API over a service binding (`API_URL`), not a hardcoded host, so a preview deployment reaches its own API instance. Bindings resolve at runtime only, so `apps/web/src/lib/server-api.ts` reads `API_URL` inside functions and never at module scope.
+- `API_URL` is the API service base URL and no longer includes `/v1`; `apiBaseUrl()` in `apps/web/src/lib/server-api.ts` appends it. `WEB_ORIGIN` is still set by hand and must match on both services. Both sides read the same project-level variable, so the CSRF origin check passes on preview deployments too.
+- Database migrations are run by hand against Neon (`pnpm --filter @repo/db db:migrate` with `DATABASE_URL_UNPOOLED`), never as part of a Vercel build.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { KeyRound, Lock, Mail, ArrowRight, Loader2 } from "lucide-react";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [email, setEmail] = useState("");
@@ -128,6 +128,16 @@ export default function LoginPage() {
                     </Link>
                 </p>
             </div>
+        </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
+            <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin text-primary" />}>
+                <LoginForm />
+            </Suspense>
         </div>
     );
 }

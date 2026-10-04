@@ -1,16 +1,14 @@
 import { createApiClient } from "@repo/core";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-const API_URL = process.env.API_URL || "http://localhost:3000/v1";
-const WEB_ORIGIN = process.env.WEB_ORIGIN || "http://localhost:3000";
+import { apiBaseUrl, webOrigin } from "@/lib/server-api";
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
         const client = createApiClient({
-            baseUrl: API_URL,
-            origin: WEB_ORIGIN,
+            baseUrl: apiBaseUrl(),
+            origin: webOrigin(),
         });
 
         const { user, sessionToken } = await client.login(body);

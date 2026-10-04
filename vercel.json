@@ -1,0 +1,47 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "services": {
+        "api": {
+            "root": "apps/api",
+            "framework": "hono",
+            "routes": [
+                {
+                    "src": "/api/v1/(.*)",
+                    "transforms": [
+                        {
+                            "type": "request.path",
+                            "op": "set",
+                            "args": "/v1/$1"
+                        }
+                    ]
+                }
+            ]
+        },
+        "web": {
+            "root": "apps/web",
+            "framework": "nextjs",
+            "bindings": [
+                {
+                    "type": "service",
+                    "service": "api",
+                    "format": "url",
+                    "env": "API_URL"
+                }
+            ]
+        }
+    },
+    "rewrites": [
+        {
+            "source": "/api/v1/(.*)",
+            "destination": {
+                "service": "api"
+            }
+        },
+        {
+            "source": "/(.*)",
+            "destination": {
+                "service": "web"
+            }
+        }
+    ]
+}

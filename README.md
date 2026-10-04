@@ -37,3 +37,39 @@ pnpm test
 ```
 
 Filter to one package with `pnpm exec turbo <task> --filter=<package>`.
+
+## Deploy
+
+`vercel.json` at the repo root defines one Vercel project with two services:
+
+| Service | Root            | Public path  | Reached by                        |
+| ------- | --------------- | ------------ | --------------------------------- |
+| `web`   | `apps/web`      | `/`          | Browsers                          |
+| `api`   | `apps/api`      | `/api/v1`    | The web app, over a service binding |
+
+The web app holds the session cookie and proxies browser traffic to the API
+through its own `/api/proxy` route, so the API is never called cross-origin by
+the browser. It reaches the API server-side over the `API_URL` binding, which
+means a preview deployment talks to its own API instance.
+
+Set these once as project environment variables:
+
+| Variable             | Used by | Notes                                                        |
+| -------------------- | ------- | ------------------------------------------------------------ |
+| `DATABASE_URL`       | `api`   | Neon pooled connection string                                 |
+| `MASTER_KEYS`        | `api`   | JSON map of key id to base64 32-byte key                      |
+| `MASTER_KEY_CURRENT` | `api`   | Key id used for new writes                                     |
+| `EMAIL_FROM`         | `api`   | Sender for verification and reset email                        |
+| `CRON_SECRET`        | `api`   | Optional; no cron routes exist yet                             |
+| `WEB_ORIGIN`         | both    | The project's own domain, e.g. `https://seal.example.com`      |
+
+`API_URL` is not set by hand. The binding in `vercel.json` injects it at
+request time; `apps/web/.env.example` only needs it for local development.
+
+Run migrations by hand against Neon, not in the build:
+
+```sh
+DATABASE_URL_UNPOOLED=<neon-direct-connection-string> pnpm --filter @repo/db db:migrate
+```
+
+To exercise the service routing locally, use `vercel dev` instead of `pnpm dev`.

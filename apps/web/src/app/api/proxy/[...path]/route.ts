@@ -1,15 +1,13 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-const API_URL = process.env.API_URL || "http://localhost:3000/v1";
-const WEB_ORIGIN = process.env.WEB_ORIGIN || "http://localhost:3000";
+import { apiBaseUrl, webOrigin } from "@/lib/server-api";
 
 async function proxy(request: Request, context: { params: Promise<{ path: string[] }> }) {
     const { path } = await context.params;
     const targetPath = "/" + path.join("/");
 
     const url = new URL(request.url);
-    const targetUrl = new URL(API_URL + targetPath);
+    const targetUrl = new URL(apiBaseUrl() + targetPath);
     url.searchParams.forEach((val, key) => {
         targetUrl.searchParams.set(key, val);
     });
@@ -19,7 +17,7 @@ async function proxy(request: Request, context: { params: Promise<{ path: string
 
     const headers: Record<string, string> = {
         Accept: "application/json",
-        Origin: WEB_ORIGIN,
+        Origin: webOrigin(),
     };
 
     const contentType = request.headers.get("content-type");
