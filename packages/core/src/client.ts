@@ -58,7 +58,11 @@ export class ApiError extends Error {
 }
 
 export interface ApiClientOptions {
-    /** Origin of the API including `/v1`, e.g. `https://api.example.com/v1`. */
+    /**
+     * Either an absolute API base including `/v1`, e.g. `https://api.example.com/v1`,
+     * or a path relative to the current origin, e.g. `/api/proxy`. The relative
+     * form is browser-only and is how the web app's client reaches its own proxy.
+     */
     baseUrl: string;
     /** Device token (`seald_...`) or service token (`seal_live_...`). */
     token?: string;
@@ -103,9 +107,22 @@ export function createApiClient(options: ApiClientOptions) {
     const baseUrl = options.baseUrl.replace(/\/+$/, "");
     const doFetch = options.fetch ?? fetch;
     const timeoutMs = options.timeoutMs ?? 15_000;
+    const isAbsolute = /^[a-z][a-z\d+\-.]*:/i.test(baseUrl);
+
+    /**
+     * Resolves a request path against the base URL. A relative `baseUrl` means
+     * "same origin as the current page", which is how the browser client reaches
+     * the web app's proxy, and is only meaningful where a document exists.
+     */
+    function resolve(path: string): URL {
+        if (isAbsolute) return new URL(baseUrl + path);
+        const origin = (globalThis as { location?: { origin?: string } }).location?.origin;
+        if (origin) return new URL(baseUrl + path, origin);
+        throw new ApiError("INTERNAL", `Relative API baseUrl "${baseUrl}" cannot be used outside a browser`, 0);
+    }
 
     async function send(method: string, path: string, { body, query }: RequestOptions = {}): Promise<Response> {
-        const url = new URL(baseUrl + path);
+        const url = resolve(path);
         for (const [key, value] of Object.entries(query ?? {})) {
             if (value !== undefined) url.searchParams.set(key, String(value));
         }
