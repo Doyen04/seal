@@ -109,6 +109,10 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
 
     const isViewer = currentWorkspace?.role === "viewer";
 
+    // Creating a project requires admin (projects.ts:78). Showing the button to
+    // editors produced a guaranteed 403 with their input still in the dialog.
+    const canCreateProject = currentWorkspace?.role === "owner" || currentWorkspace?.role === "admin";
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Navbar
@@ -128,7 +132,7 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
                         </p>
                     </div>
 
-                    {!isViewer && (
+                    {canCreateProject && (
                         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                             <DialogTrigger asChild>
                                 <Button className="font-medium shadow-md shadow-primary/10">
@@ -221,7 +225,7 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
                                     : "Get started by creating your first project."}
                             </p>
                         </div>
-                        {!isViewer && !search && (
+                        {canCreateProject && !search && (
                             <Button onClick={() => setDialogOpen(true)} variant="outline">
                                 <Plus className="mr-2 h-4 w-4" /> Create Project
                             </Button>

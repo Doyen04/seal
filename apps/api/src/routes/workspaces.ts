@@ -4,8 +4,11 @@ import {
     createWorkspaceSchema,
     inviteMemberSchema,
     updateMemberSchema,
+    updateMemberAccessSchema,
+    type AccessOverride,
     type AuditPageDto,
     type InvitationDto,
+    type MemberAccessDto,
     type MemberDto,
     type RemoveMemberResponse,
     type RotationChecklistEntry,
@@ -28,6 +31,7 @@ import {
     users,
     workspaceMembers,
     workspaces,
+    type Executor,
 } from "@repo/db";
 import { Hono } from "hono";
 import type { AppEnv } from "../context.js";
@@ -41,6 +45,65 @@ import { getUserPrincipal, requireAuth } from "../middleware/authenticate.js";
 const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const anyUser = requireAuth("user", "device");
+
+/**
+ * Rejects any environment that is not a project in this workspace.
+ *
+ * Without this an admin of workspace A could name an environment belonging to
+ * workspace B and have a grant written against it. Returns the accepted rows so
+ * callers can report project and environment names back to the client.
+ */
+async function resolveWorkspaceEnvironments(
+    db: Executor,
+    workspaceId: string,
+    requested: { environmentId: string; access: AccessOverride }[],
+): Promise<Map<string, { projectId: string; projectName: string; environmentName: string }>> {
+    const uniqueIds = [...new Set(requested.map((r) => r.environmentId))];
+    const found = new Map<string, { projectId: string; projectName: string; environmentName: string }>();
+    if (uniqueIds.length === 0) return found;
+
+    const rows = await db
+        .select({
+            environmentId: environments.id,
+            environmentName: environments.name,
+            projectId: projects.id,
+            projectName: projects.name,
+        })
+        .from(environments)
+        .innerJoin(projects, eq(projects.id, environments.projectId))
+        .where(and(eq(projects.workspaceId, workspaceId), inArray(environments.id, uniqueIds)));
+
+    for (const row of rows) {
+        found.set(row.environmentId, {
+            projectId: row.projectId,
+            projectName: row.projectName,
+            environmentName: row.environmentName,
+        });
+    }
+
+    const unknown = uniqueIds.filter((id) => !found.has(id));
+    if (unknown.length > 0) {
+        throw validationError("One or more environments do not belong to this workspace");
+    }
+    return found;
+}
+
+/** Flattens validated overrides into the DTO shape the clients render. */
+function toAccessDtos(
+    requested: { environmentId: string; access: AccessOverride }[],
+    resolved: Map<string, { projectId: string; projectName: string; environmentName: string }>,
+): MemberAccessDto[] {
+    return requested.map((entry) => {
+        const meta = resolved.get(entry.environmentId)!;
+        return {
+            projectId: meta.projectId,
+            projectName: meta.projectName,
+            environmentId: entry.environmentId,
+            environmentName: meta.environmentName,
+            access: entry.access,
+        };
+    });
+}
 
 export const workspaceRoutes = new Hono<AppEnv>();
 
@@ -122,11 +185,109 @@ workspaceRoutes.get("/workspaces/:wid/members", anyUser, async (c) => {
         .where(eq(workspaceMembers.workspaceId, wid))
         .orderBy(workspaceMembers.createdAt);
 
+    // Existing per-environment overrides, so the client can render an edit form
+    // without a second request.
+    const overrides = await db
+        .select({
+            userId: environmentAccess.userId,
+            environmentId: environmentAccess.environmentId,
+            access: environmentAccess.access,
+            environmentName: environments.name,
+            projectId: projects.id,
+            projectName: projects.name,
+        })
+        .from(environmentAccess)
+        .innerJoin(environments, eq(environments.id, environmentAccess.environmentId))
+        .innerJoin(projects, eq(projects.id, environments.projectId))
+        .where(eq(projects.workspaceId, wid));
+
+    const byUser = new Map<string, MemberAccessDto[]>();
+    for (const row of overrides) {
+        const list = byUser.get(row.userId) ?? [];
+        list.push({
+            projectId: row.projectId,
+            projectName: row.projectName,
+            environmentId: row.environmentId,
+            environmentName: row.environmentName,
+            access: row.access,
+        });
+        byUser.set(row.userId, list);
+    }
+
     const members: MemberDto[] = rows.map((row) => ({
         ...row,
         joinedAt: row.joinedAt.toISOString(),
+        access: byUser.get(row.userId) ?? [],
     }));
     return c.json({ members });
+});
+
+/** Replaces a member's per-environment access wholesale. */
+workspaceRoutes.put("/workspaces/:wid/members/:uid/access", anyUser, async (c) => {
+    const wid = c.req.param("wid");
+    const uid = c.req.param("uid");
+    await requireWorkspaceRole(c, wid, "admin");
+    const body = await parseJson(c, updateMemberAccessSchema);
+    const { db } = c.get("deps");
+
+    const [member] = await db
+        .select({ userId: workspaceMembers.userId, role: workspaceMembers.role })
+        .from(workspaceMembers)
+        .where(and(eq(workspaceMembers.workspaceId, wid), eq(workspaceMembers.userId, uid)))
+        .limit(1);
+    if (!member) throw notFound("Member not found");
+
+    // Overrides are meaningless for owners and admins, whose access is always
+    // admin, so reject rather than silently storing rows that never apply.
+    if (member.role === "owner" || member.role === "admin") {
+        throw validationError("Owners and admins already have full access to every environment");
+    }
+
+    const resolvedEnvs = await resolveWorkspaceEnvironments(db, wid, body.access);
+
+    await db.transaction(async (tx) => {
+        // Wholesale replace: clear every override this member holds in this
+        // workspace, not just the ones named in the request. Scoping the delete
+        // to the incoming list would silently keep overrides the caller removed.
+        const workspaceEnvIds = tx
+            .select({ id: environments.id })
+            .from(environments)
+            .innerJoin(projects, eq(projects.id, environments.projectId))
+            .where(eq(projects.workspaceId, wid));
+
+        await tx
+            .delete(environmentAccess)
+            .where(and(eq(environmentAccess.userId, uid), inArray(environmentAccess.environmentId, workspaceEnvIds)));
+
+        if (body.access.length > 0) {
+            await tx
+                .insert(environmentAccess)
+                .values(
+                    body.access.map((entry) => ({
+                        environmentId: entry.environmentId,
+                        userId: uid,
+                        access: entry.access,
+                    })),
+                )
+                .onConflictDoUpdate({
+                    target: [environmentAccess.environmentId, environmentAccess.userId],
+                    set: { access: sql`excluded."access"` },
+                });
+        }
+
+        await writeAudit(tx, c, {
+            workspaceId: wid,
+            action: "member.access_change",
+            targetType: "user",
+            targetId: uid,
+            metadata: { environmentAccess: toAccessDtos(body.access, resolvedEnvs) },
+        });
+    });
+
+    const response: { access: MemberAccessDto[] } = {
+        access: toAccessDtos(body.access, resolvedEnvs),
+    };
+    return c.json(response);
 });
 
 workspaceRoutes.post("/workspaces/:wid/invitations", anyUser, async (c) => {
@@ -155,6 +316,9 @@ workspaceRoutes.post("/workspaces/:wid/invitations", anyUser, async (c) => {
     const principal = getUserPrincipal(c);
     const { token, hash } = generateToken("email");
 
+    // Reject foreign or archived environments before anything is written.
+    const resolvedEnvs = await resolveWorkspaceEnvironments(db, wid, body.access);
+
     const invitation = await db.transaction(async (tx) => {
         const [created] = await tx
             .insert(invitations)
@@ -164,6 +328,7 @@ workspaceRoutes.post("/workspaces/:wid/invitations", anyUser, async (c) => {
                 role: body.role,
                 tokenHash: hash,
                 expiresAt: new Date(Date.now() + INVITATION_TTL_MS),
+                accessOverrides: body.access,
                 invitedBy: principal.userId,
             })
             .returning();
@@ -173,7 +338,11 @@ workspaceRoutes.post("/workspaces/:wid/invitations", anyUser, async (c) => {
             action: "member.invite",
             targetType: "invitation",
             targetId: created.id,
-            metadata: { email: body.email, role: body.role },
+            metadata: {
+                email: body.email,
+                role: body.role,
+                environmentAccess: toAccessDtos(body.access, resolvedEnvs),
+            },
         });
         return created;
     });
@@ -185,6 +354,7 @@ workspaceRoutes.post("/workspaces/:wid/invitations", anyUser, async (c) => {
         email: invitation.email,
         role: invitation.role,
         expiresAt: invitation.expiresAt.toISOString(),
+        access: toAccessDtos(body.access, resolvedEnvs),
     };
     return c.json(response, 201);
 });
@@ -226,11 +396,32 @@ workspaceRoutes.post("/invitations/accept", anyUser, async (c) => {
             })
             .onConflictDoNothing();
 
+        // Turn the permissions chosen at invite time into real grants. Skipped
+        // for owners and admins, whose access is fixed at "admin" and which
+        // never consult environment_access.
+        const overrides = invitation.accessOverrides ?? [];
+        if (overrides.length > 0 && invitation.role !== "owner" && invitation.role !== "admin") {
+            await tx
+                .insert(environmentAccess)
+                .values(
+                    overrides.map((entry) => ({
+                        environmentId: entry.environmentId,
+                        userId: principal.userId,
+                        access: entry.access,
+                    })),
+                )
+                .onConflictDoUpdate({
+                    target: [environmentAccess.environmentId, environmentAccess.userId],
+                    set: { access: sql`excluded."access"` },
+                });
+        }
+
         await writeAudit(tx, c, {
             workspaceId: invitation.workspaceId,
             action: "member.accept",
             targetType: "invitation",
             targetId: invitation.id,
+            metadata: overrides.length > 0 ? { environmentAccess: overrides } : undefined,
         });
 
         const [joined] = await tx
@@ -299,8 +490,33 @@ workspaceRoutes.patch("/workspaces/:wid/members/:uid", anyUser, async (c) => {
         return row;
     });
 
+    // Role changes do not touch environment_access, so carry the member's existing
+    // overrides back rather than reporting an empty list.
+    const memberOverrides = await db
+        .select({
+            environmentId: environmentAccess.environmentId,
+            access: environmentAccess.access,
+            environmentName: environments.name,
+            projectId: projects.id,
+            projectName: projects.name,
+        })
+        .from(environmentAccess)
+        .innerJoin(environments, eq(environments.id, environmentAccess.environmentId))
+        .innerJoin(projects, eq(projects.id, environments.projectId))
+        .where(and(eq(environmentAccess.userId, uid), eq(projects.workspaceId, wid)));
+
     const response: { member: MemberDto } = {
-        member: { ...member, joinedAt: member.joinedAt.toISOString() },
+        member: {
+            ...member,
+            joinedAt: member.joinedAt.toISOString(),
+            access: memberOverrides.map((row) => ({
+                projectId: row.projectId,
+                projectName: row.projectName,
+                environmentId: row.environmentId,
+                environmentName: row.environmentName,
+                access: row.access,
+            })),
+        },
     };
     return c.json(response);
 });
@@ -433,6 +649,7 @@ workspaceRoutes.get("/workspaces/:wid/audit", anyUser, async (c) => {
     const conditions = [eq(auditLogs.workspaceId, wid)];
     if (query.action) conditions.push(eq(auditLogs.action, query.action));
     if (query.actor) conditions.push(eq(auditLogs.actorId, query.actor));
+    if (query.actorType) conditions.push(eq(auditLogs.actorType, query.actorType));
     if (query.cursor) {
         const cursor = decodeCursor(query.cursor);
         conditions.push(

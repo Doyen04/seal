@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { History, Shield, Loader2, ChevronRight, User, Laptop, Key } from "lucide-react";
+import { History, Shield, Loader2, ChevronLeft, ChevronRight, User, Laptop, Key } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { client } from "@/lib/api-client";
-import type { WorkspaceDto, AuditEntryDto, UserDto } from "@repo/core";
+import type { WorkspaceDto, AuditEntryDto, UserDto, AuditQuery } from "@repo/core";
 import { toast } from "sonner";
 
 export default function WorkspaceAuditPage({ params }: { params: Promise<{ workspace: string }> }) {
@@ -27,29 +27,72 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
     const [actorFilter, setActorFilter] = useState<string>("all");
     const [actionFilter, setActionFilter] = useState<string>("all");
 
+    // Cursors already visited, so Previous can walk back without re-querying
+    // from the start. Empty string marks the first page.
+    const [cursorHistory, setCursorHistory] = useState<string[]>([]);
+
+    const fetchPage = async (cursor: string | undefined, filters: { actor: string; action: string }) => {
+        const meRes = await client.me();
+        setUser(meRes.user);
+        setWorkspaces(meRes.workspaces);
+
+        const ws = meRes.workspaces.find((w) => w.slug === workspaceSlug);
+        if (!ws) {
+            toast.error("Workspace not found");
+            router.push("/");
+            return null;
+        }
+        setCurrentWorkspace(ws);
+
+        const query: Partial<AuditQuery> = { limit: 20 };
+        if (cursor) query.cursor = cursor;
+        if (filters.actor !== "all") query.actorType = filters.actor as AuditQuery["actorType"];
+        if (filters.action !== "all") query.action = filters.action;
+
+        const res = await client.audit(ws.id, query);
+        setNextCursor(res.nextCursor || null);
+        return res.entries;
+    };
+
     const loadData = async (cursor?: string) => {
         try {
             setLoading(true);
-            const meRes = await client.me();
-            setUser(meRes.user);
-            setWorkspaces(meRes.workspaces);
+            const page = await fetchPage(cursor, { actor: actorFilter, action: actionFilter });
+            if (page) setEntries(page);
+        } catch (err: any) {
+            toast.error(err.message || "Failed to load audit logs");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-            const ws = meRes.workspaces.find((w) => w.slug === workspaceSlug);
-            if (!ws) {
-                toast.error("Workspace not found");
-                router.push("/");
-                return;
+    const loadNextPage = async () => {
+        if (!nextCursor) return;
+        try {
+            setLoading(true);
+            const page = await fetchPage(nextCursor, { actor: actorFilter, action: actionFilter });
+            if (page) {
+                setEntries((prev) => [...prev, ...page]);
+                setCursorHistory((prev) => [...prev, nextCursor]);
             }
-            setCurrentWorkspace(ws);
+        } catch (err: any) {
+            toast.error(err.message || "Failed to load audit logs");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-            const query: any = { limit: 20 };
-            if (cursor) query.cursor = cursor;
-            if (actorFilter !== "all") query.actorType = actorFilter;
-            if (actionFilter !== "all") query.action = actionFilter;
-
-            const res = await client.audit(ws.id, query);
-            setEntries(res.entries);
-            setNextCursor(res.nextCursor || null);
+    const loadPreviousPage = async () => {
+        if (cursorHistory.length === 0) return;
+        try {
+            setLoading(true);
+            const targetIndex = cursorHistory.length - 1;
+            const cursor = targetIndex === 0 ? undefined : cursorHistory[targetIndex - 1];
+            const page = await fetchPage(cursor, { actor: actorFilter, action: actionFilter });
+            if (page) {
+                setEntries(page);
+                setCursorHistory((prev) => prev.slice(0, targetIndex));
+            }
         } catch (err: any) {
             toast.error(err.message || "Failed to load audit logs");
         } finally {
@@ -58,6 +101,7 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
     };
 
     useEffect(() => {
+        setCursorHistory([]);
         loadData();
     }, [workspaceSlug, actorFilter, actionFilter]);
 
@@ -93,9 +137,9 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                     </div>
 
                     {/* Filters */}
-                    <div className="flex items-center space-x-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <Select value={actorFilter} onValueChange={(val) => setActorFilter(val)}>
-                            <SelectTrigger className="w-36 h-9 text-xs">
+                            <SelectTrigger className="w-36 h-9 text-xs" aria-label="Filter by actor type">
                                 <SelectValue placeholder="Actor Type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -108,17 +152,27 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                         </Select>
 
                         <Select value={actionFilter} onValueChange={(val) => setActionFilter(val)}>
-                            <SelectTrigger className="w-40 h-9 text-xs">
+                            <SelectTrigger className="w-48 h-9 text-xs" aria-label="Filter by action">
                                 <SelectValue placeholder="Action" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Actions</SelectItem>
+                                {/* Only values the API actually writes. The old list
+                                    offered "secret.write", which matched nothing. */}
                                 <SelectItem value="secret.read">secret.read</SelectItem>
-                                <SelectItem value="secret.write">secret.write</SelectItem>
+                                <SelectItem value="secret.create">secret.create</SelectItem>
+                                <SelectItem value="secret.update">secret.update</SelectItem>
                                 <SelectItem value="secret.delete">secret.delete</SelectItem>
+                                <SelectItem value="secret.rollback">secret.rollback</SelectItem>
                                 <SelectItem value="secrets.export">secrets.export</SelectItem>
+                                <SelectItem value="secrets.bulk_write">secrets.bulk_write</SelectItem>
                                 <SelectItem value="member.invite">member.invite</SelectItem>
+                                <SelectItem value="member.accept">member.accept</SelectItem>
                                 <SelectItem value="member.remove">member.remove</SelectItem>
+                                <SelectItem value="member.role_change">member.role_change</SelectItem>
+                                <SelectItem value="member.access_change">member.access_change</SelectItem>
+                                <SelectItem value="token.create">token.create</SelectItem>
+                                <SelectItem value="token.revoke">token.revoke</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -184,7 +238,11 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                                                 : "—"}
                                         </TableCell>
                                         <TableCell className="text-right text-muted-foreground">
-                                            {entry.ip || "127.0.0.1"}
+                                            {/* Never invent an address: a row with no
+                                                recorded IP previously displayed
+                                                127.0.0.1, which reads as evidence
+                                                that the action came from localhost. */}
+                                            {entry.ip || "—"}
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -192,12 +250,33 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                         </TableBody>
                     </Table>
 
-                    {/* Pagination */}
-                    {nextCursor && (
-                        <div className="p-4 border-t border-border/40 flex justify-end">
-                            <Button variant="outline" size="sm" onClick={() => loadData(nextCursor)} disabled={loading}>
-                                Next Page <ChevronRight className="ml-1 h-4 w-4" />
-                            </Button>
+                    {/* Pagination. Pages accumulate and Previous walks back through the cursor
+                    chain, because replacing the rows discarded whatever the user
+                    was already looking at. */}
+                    {(nextCursor || cursorHistory.length > 0) && (
+                        <div className="p-4 border-t border-border/40 flex items-center justify-between gap-3">
+                            <span className="text-xs text-muted-foreground">
+                                Showing {entries.length} entries
+                                {cursorHistory.length > 0 && ` across ${cursorHistory.length + 1} pages`}
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={loadPreviousPage}
+                                    disabled={loading || cursorHistory.length === 0}
+                                >
+                                    <ChevronLeft className="mr-1 h-4 w-4" /> Previous
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => loadNextPage()}
+                                    disabled={loading || !nextCursor}
+                                >
+                                    Next <ChevronRight className="ml-1 h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </Card>

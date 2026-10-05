@@ -122,7 +122,12 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
         }
     };
 
-    const isAdminOrOwner = currentWorkspace?.role === "owner" || currentWorkspace?.role === "admin";
+    // Creating and revoking tokens needs write access to an environment
+    // (tokens.ts:41, :118), which editors have and viewers do not. This was
+    // previously gated to admins and owners, so editors were shown a page with no
+    // way to use it.
+    const canManageTokens =
+        currentWorkspace?.role === "editor" || currentWorkspace?.role === "admin" || currentWorkspace?.role === "owner";
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -142,7 +147,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
                         </p>
                     </div>
 
-                    {isAdminOrOwner && (
+                    {canManageTokens && (
                         <Button onClick={() => setCreateOpen(true)} className="font-medium shadow-md shadow-primary/10">
                             <Plus className="mr-2 h-4 w-4" /> Create Service Token
                         </Button>
@@ -153,7 +158,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
                     <TokensTable
                         loading={loading}
                         tokens={tokens}
-                        isAdminOrOwner={isAdminOrOwner}
+                        isAdminOrOwner={canManageTokens}
                         onRevokeClick={(tok) => setRevokeTarget(tok)}
                     />
                 </Card>

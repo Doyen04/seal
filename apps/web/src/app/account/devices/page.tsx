@@ -143,6 +143,8 @@ export default function AccountDevicesPage() {
                                                 size="icon"
                                                 onClick={() => setRevokeTarget(dev)}
                                                 className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                aria-label={`Revoke device ${dev.name}`}
+                                                title="Revoke device"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>

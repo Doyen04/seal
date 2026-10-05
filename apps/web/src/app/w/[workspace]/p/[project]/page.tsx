@@ -169,6 +169,7 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
                                     revealedValues={secretsManager.revealedValues}
                                     copiedKey={secretsManager.copiedKey}
                                     isViewer={isViewer}
+                                    loadError={secretsManager.loadError}
                                     onReveal={secretsManager.handleReveal}
                                     onCopy={secretsManager.handleCopy}
                                     onHistoryClick={secretsManager.openHistoryModal}
@@ -203,9 +204,9 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
                     open={secretsManager.conflictOpen}
                     onOpenChange={secretsManager.setConflictOpen}
                     serverVersion={secretsManager.conflictServerVersion}
-                    pendingValue={secretsManager.editValue}
+                    pendingValue={secretsManager.conflictPendingValue}
                     loading={secretsManager.editLoading}
-                    onForceOverwrite={() => secretsManager.handleEditSecret(secretsManager.editValue, true)}
+                    onForceOverwrite={() => secretsManager.handleEditSecret(secretsManager.conflictPendingValue, true)}
                 />
 
                 <DeleteSecretDialog

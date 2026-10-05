@@ -113,9 +113,43 @@ projectRoutes.post("/workspaces/:wid/projects", anyUser, async (c) => {
     return c.json(response, 201);
 });
 
+/**
+ * Project ids this member can reach at all, or null when no filtering applies.
+ *
+ * A project is visible when at least one of its environments is readable.
+ * Without this, a member whose overrides deny every environment of a project
+ * still saw the project card on the dashboard and could open an empty shell.
+ */
+async function readableProjectIds(
+    db: Executor,
+    workspaceId: string,
+    userId: string,
+    role: Role,
+): Promise<Set<string> | null> {
+    // Owners and admins have admin access everywhere, which never consults
+    // environment_access, so every project is visible to them.
+    if (role === "owner" || role === "admin") return null;
+
+    const rows = await db
+        .select({ projectId: environments.projectId, override: environmentAccess.access })
+        .from(environments)
+        .innerJoin(projects, eq(projects.id, environments.projectId))
+        .leftJoin(
+            environmentAccess,
+            and(eq(environmentAccess.environmentId, environments.id), eq(environmentAccess.userId, userId)),
+        )
+        .where(and(eq(projects.workspaceId, workspaceId), isNull(projects.archivedAt)));
+
+    const readable = new Set<string>();
+    for (const row of rows) {
+        if (accessAtLeast(computeAccess(role, row.override), "read")) readable.add(row.projectId);
+    }
+    return readable;
+}
+
 projectRoutes.get("/workspaces/:wid/projects", anyUser, async (c) => {
     const wid = c.req.param("wid");
-    await requireWorkspaceRole(c, wid, "viewer");
+    const { userId, role } = await requireWorkspaceRole(c, wid, "viewer");
     const { db } = c.get("deps");
 
     const rows = await db
@@ -124,8 +158,11 @@ projectRoutes.get("/workspaces/:wid/projects", anyUser, async (c) => {
         .where(and(eq(projects.workspaceId, wid), isNull(projects.archivedAt)))
         .orderBy(asc(projects.name));
 
+    const readable = await readableProjectIds(db, wid, userId, role);
+    const visible = readable === null ? rows : rows.filter((row) => readable.has(row.id));
+
     const response: { projects: ProjectDto[] } = {
-        projects: rows.map(toProjectDto),
+        projects: visible.map(toProjectDto),
     };
     return c.json(response);
 });
@@ -153,6 +190,13 @@ projectRoutes.get("/projects/:pid", anyUser, async (c) => {
     const visible = rows
         .filter((row) => accessAtLeast(computeAccess(role, row.override), "read"))
         .map(({ id, name, slug }) => ({ id, name, slug }));
+
+    // A project with no readable environment is not merely empty, it does not
+    // exist as far as this member is concerned. Answering 200 with an empty list
+    // would confirm the project exists and expose its name.
+    if (visible.length === 0 && role !== "owner" && role !== "admin") {
+        throw notFound("Project not found");
+    }
 
     const response: ProjectDetailDto = {
         ...toProjectDto(project),

@@ -2,15 +2,17 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MembersTable } from "@/components/members/members-table";
 import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
 import { RemoveMemberDialog } from "@/components/members/remove-member-dialog";
+import { EditMemberAccessDialog } from "@/components/members/edit-member-access-dialog";
+import type { AccessPickerProject } from "@/components/members/environment-access-picker";
 import { client } from "@/lib/api-client";
-import type { WorkspaceSummaryDto, MemberDto, UserDto, RotationChecklistEntry } from "@repo/core";
+import type { WorkspaceSummaryDto, MemberDto, UserDto, RotationChecklistEntry, AccessOverride } from "@repo/core";
 import { toast } from "sonner";
 
 export default function WorkspaceMembersPage({ params }: { params: Promise<{ workspace: string }> }) {
@@ -22,6 +24,7 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
     const [workspaces, setWorkspaces] = useState<WorkspaceSummaryDto[]>([]);
     const [currentWorkspace, setCurrentWorkspace] = useState<WorkspaceSummaryDto>();
     const [members, setMembers] = useState<MemberDto[]>([]);
+    const [projects, setProjects] = useState<AccessPickerProject[]>([]);
 
     // Modals
     const [inviteOpen, setInviteOpen] = useState(false);
@@ -29,6 +32,9 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
     const [removeTarget, setRemoveTarget] = useState<MemberDto | null>(null);
     const [removeLoading, setRemoveLoading] = useState(false);
     const [rotationChecklist, setRotationChecklist] = useState<RotationChecklistEntry[] | null>(null);
+    const [accessOpen, setAccessOpen] = useState(false);
+    const [accessTarget, setAccessTarget] = useState<MemberDto | null>(null);
+    const [accessLoading, setAccessLoading] = useState(false);
 
     const loadData = async () => {
         try {
@@ -47,6 +53,24 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
 
             const memRes = await client.listMembers(ws.id);
             setMembers(memRes.members);
+
+            // Needed by both the invite picker and the access editor. Two guarantees come
+            // from the API rather than from filtering here: listProjects omits
+            // archived projects, and getProject returns only the environments the
+            // caller can read. So the picker can never offer an environment the
+            // person granting it is unable to see.
+            const projRes = await client.listProjects(ws.id);
+            const withEnvs = await Promise.all(
+                projRes.projects.map(async (proj) => {
+                    const detail = await client.getProject(proj.id);
+                    return {
+                        id: proj.id,
+                        name: proj.name,
+                        environments: detail.environments.map((e) => ({ id: e.id, name: e.name })),
+                    };
+                }),
+            );
+            setProjects(withEnvs);
         } catch (err: any) {
             toast.error(err.message || "Failed to load members");
         } finally {
@@ -58,14 +82,51 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
         loadData();
     }, [workspaceSlug]);
 
-    const handleInvite = async (email: string, role: "admin" | "editor" | "viewer") => {
+    const handleInvite = async (
+        email: string,
+        role: "admin" | "editor" | "viewer",
+        access: { environmentId: string; access: AccessOverride }[],
+    ) => {
         if (!currentWorkspace) return;
         try {
-            await client.inviteMember(currentWorkspace.id, { email, role });
+            await client.inviteMember(currentWorkspace.id, { email, role, access });
             toast.success(`Invitation sent to ${email}!`);
             loadData();
         } catch (err: any) {
             toast.error(err.message || "Failed to send invitation");
+            throw err;
+        }
+    };
+
+    /** Re-reads one member's overrides so the editor never shows a stale map. */
+    const openAccessEditor = async (member: MemberDto) => {
+        setAccessTarget(member);
+        setAccessLoading(true);
+        setAccessOpen(true);
+        try {
+            if (currentWorkspace) {
+                const fresh = await client.listMembers(currentWorkspace.id);
+                const updated = fresh.members.find((m) => m.userId === member.userId) ?? null;
+                setAccessTarget(updated);
+                setMembers(fresh.members);
+            }
+        } catch (err: any) {
+            toast.error(err.message || "Failed to load current access");
+            setAccessOpen(false);
+        } finally {
+            setAccessLoading(false);
+        }
+    };
+
+    const handleSaveAccess = async (access: { environmentId: string; access: AccessOverride }[]) => {
+        if (!currentWorkspace || !accessTarget) return;
+        try {
+            await client.updateMemberAccess(currentWorkspace.id, accessTarget.userId, access);
+            toast.success(`Updated access for ${accessTarget.name || accessTarget.email}`);
+            const fresh = await client.listMembers(currentWorkspace.id);
+            setMembers(fresh.members);
+        } catch (err: any) {
+            toast.error(err.message || "Failed to update environment access");
             throw err;
         }
     };
@@ -106,6 +167,31 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
 
     const isAdminOrOwner = currentWorkspace?.role === "owner" || currentWorkspace?.role === "admin";
 
+    // Viewers are not offered Members in the navigation; without this guard they
+    // could still reach it by typing the address. The API allows viewers to list
+    // members, so the restriction is enforced here.
+    if (!loading && currentWorkspace && currentWorkspace.role === "viewer") {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <Navbar
+                    currentWorkspace={currentWorkspace}
+                    workspaces={workspaces}
+                    user={user}
+                    userRole={currentWorkspace.role}
+                />
+                <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
+                    <Card className="border-border/60 shadow-sm">
+                        <div className="p-8 text-center text-muted-foreground">
+                            <Users className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                            <p className="font-medium text-foreground">Members are not visible to viewers</p>
+                            <p className="text-xs mt-1">Ask an admin if you need access to this page.</p>
+                        </div>
+                    </Card>
+                </main>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Navbar
@@ -138,6 +224,7 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
                         user={user}
                         isAdminOrOwner={isAdminOrOwner}
                         onRoleChange={handleRoleChange}
+                        onAccessClick={openAccessEditor}
                         onRemoveClick={(mem) => {
                             setRemoveTarget(mem);
                             setRotationChecklist(null);
@@ -150,7 +237,19 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
                     open={inviteOpen}
                     onOpenChange={setInviteOpen}
                     workspaceName={currentWorkspace?.name}
+                    projects={projects}
                     onInvite={handleInvite}
+                />
+
+                <EditMemberAccessDialog
+                    open={accessOpen}
+                    onOpenChange={setAccessOpen}
+                    memberName={accessTarget?.name || accessTarget?.email}
+                    memberRole={accessTarget?.role}
+                    projects={projects}
+                    initialAccess={accessTarget?.access ?? null}
+                    loading={accessLoading}
+                    onSave={handleSaveAccess}
                 />
 
                 <RemoveMemberDialog

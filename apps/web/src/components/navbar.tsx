@@ -16,6 +16,7 @@ import {
     Moon,
     Sun,
     Menu,
+    type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,14 +28,14 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
-import type { WorkspaceSummaryDto, UserDto } from "@repo/core";
+import type { RoleName, WorkspaceSummaryDto, UserDto } from "@repo/core";
 import { toast } from "sonner";
 
 interface NavbarProps {
     currentWorkspace?: WorkspaceSummaryDto;
     workspaces?: WorkspaceSummaryDto[];
     user?: UserDto;
-    userRole?: string;
+    userRole?: RoleName;
 }
 
 export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: NavbarProps) {
@@ -54,14 +55,26 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
 
     const wsSlug = currentWorkspace?.slug;
 
-    const navItems = wsSlug
+    // Each item declares the lowest workspace role that may see it. These mirror
+    // the API guards: members listing needs at least viewer, audit log needs
+    // admin (workspaces.ts:429). Without this, a viewer is offered pages that
+    // answer 403 and then render a misleading empty state.
+    const ROLE_RANK: Record<RoleName, number> = { viewer: 1, editor: 2, admin: 3, owner: 4 };
+    const rank = userRole ? ROLE_RANK[userRole] : 0;
+
+    type NavItem = { label: string; href: string; icon: LucideIcon; minRole: RoleName };
+    const allNavItems: NavItem[] = wsSlug
         ? [
-              { label: "Projects", href: `/w/${wsSlug}`, icon: FolderKanban },
-              { label: "Members", href: `/w/${wsSlug}/settings/members`, icon: Users },
-              { label: "Service Tokens", href: `/w/${wsSlug}/settings/tokens`, icon: Key },
-              { label: "Audit Log", href: `/w/${wsSlug}/settings/audit`, icon: History },
+              { label: "Projects", href: `/w/${wsSlug}`, icon: FolderKanban, minRole: "viewer" },
+              { label: "Members", href: `/w/${wsSlug}/settings/members`, icon: Users, minRole: "editor" },
+              { label: "Service Tokens", href: `/w/${wsSlug}/settings/tokens`, icon: Key, minRole: "viewer" },
+              { label: "Audit Log", href: `/w/${wsSlug}/settings/audit`, icon: History, minRole: "admin" },
           ]
         : [];
+
+    const navItems = allNavItems
+        .filter((item) => rank >= ROLE_RANK[item.minRole])
+        .map(({ minRole: _minRole, ...item }) => item);
 
     const isActiveItem = (href: string) => pathname === href || (href !== `/w/${wsSlug}` && pathname.startsWith(href));
 
