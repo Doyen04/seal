@@ -73,6 +73,7 @@ export function createApp(getDeps: () => Deps) {
             JSON.stringify({
                 requestId: c.get("requestId"),
                 error: err.name,
+                err: err,//remove when am done
                 ...(err instanceof ConfigError ? { message: err.message } : {}),
             }),
         );
