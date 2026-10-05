@@ -66,7 +66,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
     const isActiveItem = (href: string) => pathname === href || (href !== `/w/${wsSlug}` && pathname.startsWith(href));
 
     const linkClass = (isActive: boolean) =>
-        `flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
+        `flex shrink-0 items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
             isActive
                 ? "bg-secondary text-secondary-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -131,8 +131,8 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Nav items: inline from lg up, behind a menu below that */}
-                    <nav className="hidden lg:flex shrink-0 items-center gap-1 pl-4 border-l border-border/40">
+                    {/* Nav items: inline from xl up, behind a menu below that */}
+                    <nav className="hidden xl:flex shrink-0 items-center gap-1 pl-4 border-l border-border/40">
                         {navItems.map((item) => {
                             const Icon = item.icon;
                             return (
@@ -151,7 +151,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                                     variant="ghost"
                                     size="icon"
                                     aria-label="Open workspace navigation"
-                                    className="lg:hidden shrink-0 h-9 w-9 rounded-lg"
+                                    className="xl:hidden shrink-0 h-9 w-9 rounded-lg"
                                 >
                                     <Menu className="h-5 w-5" />
                                 </Button>
