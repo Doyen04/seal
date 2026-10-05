@@ -56,7 +56,7 @@ function ResetPasswordForm() {
                     </CardFooter>
                 </>
             ) : (
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="contents">
                     <CardHeader className="space-y-1">
                         <CardTitle className="text-xl">Set New Password</CardTitle>
                         <CardDescription>Enter your reset token and new password below.</CardDescription>
@@ -78,7 +78,7 @@ function ResetPasswordForm() {
                         <div className="space-y-2">
                             <Label htmlFor="password">New Password (min 10 chars)</Label>
                             <div className="relative">
-                                <KeyRound className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="password"
                                     type="password"

@@ -56,7 +56,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <Card className="border-border/60 shadow-xl backdrop-blur-sm">
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} className="contents">
                         <CardHeader className="space-y-1">
                             <CardTitle className="text-xl">Workspace Details</CardTitle>
                             <CardDescription>

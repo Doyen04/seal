@@ -77,12 +77,12 @@ export default function SignupPage() {
                         <CardTitle className="text-xl">Get started</CardTitle>
                         <CardDescription>Create a free developer account to set up your workspace</CardDescription>
                     </CardHeader>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} className="contents">
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Full Name</Label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="name"
                                         type="text"
@@ -98,7 +98,7 @@ export default function SignupPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email address</Label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="email"
                                         type="email"
@@ -114,7 +114,7 @@ export default function SignupPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password (min 10 characters)</Label>
                                 <div className="relative">
-                                    <KeyRound className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="password"
                                         type="password"

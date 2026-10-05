@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
                             </CardFooter>
                         </>
                     ) : (
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} className="contents">
                             <CardHeader className="space-y-1">
                                 <CardTitle className="text-xl">Reset your password</CardTitle>
                                 <CardDescription>
@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email address</Label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
                                             id="email"
                                             type="email"

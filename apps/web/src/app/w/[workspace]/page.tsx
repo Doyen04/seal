@@ -136,7 +136,7 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-md">
-                                <form onSubmit={handleCreateProject}>
+                                <form onSubmit={handleCreateProject} className="contents">
                                     <DialogHeader>
                                         <DialogTitle>Create New Project</DialogTitle>
                                         <DialogDescription>
@@ -188,7 +188,7 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
                 {/* Search & Filter */}
                 <div className="flex items-center space-x-3 max-w-sm">
                     <div className="relative w-full">
-                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search projects..."
                             value={search}
