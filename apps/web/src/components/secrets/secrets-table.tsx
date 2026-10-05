@@ -32,7 +32,7 @@ export function SecretsTable({
     onDeleteClick,
 }: SecretsTableProps) {
     return (
-        <Table>
+        <Table className="min-w-180">
             <TableHeader>
                 <TableRow className="hover:bg-transparent">
                     <TableHead className="w-[30%] font-semibold">Key</TableHead>
@@ -68,7 +68,7 @@ export function SecretsTable({
 
                                 <TableCell className="font-mono text-sm">
                                     <div className="flex items-center space-x-2">
-                                        <span className="truncate max-w-[280px]">
+                                        <span className="truncate max-w-70">
                                             {isRevealed ? (
                                                 <span className="text-emerald-500 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded">
                                                     {val}

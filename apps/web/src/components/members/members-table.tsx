@@ -25,7 +25,7 @@ export function MembersTable({
     onRemoveClick,
 }: MembersTableProps) {
     return (
-        <Table>
+        <Table className="min-w-150">
             <TableHeader>
                 <TableRow className="hover:bg-transparent">
                     <TableHead className="font-semibold">User</TableHead>

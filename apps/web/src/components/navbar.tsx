@@ -15,6 +15,7 @@ import {
     Plus,
     Moon,
     Sun,
+    Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,32 +63,41 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
           ]
         : [];
 
+    const isActiveItem = (href: string) => pathname === href || (href !== `/w/${wsSlug}` && pathname.startsWith(href));
+
+    const linkClass = (isActive: boolean) =>
+        `flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
+            isActive
+                ? "bg-secondary text-secondary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+        }`;
+
     return (
         <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
-            <div className="flex h-16 items-center justify-between px-4 md:px-8">
+            <div className="flex h-16 items-center justify-between gap-2 px-4 md:px-8">
                 {/* Left: Brand & Workspace Selector */}
-                <div className="flex items-center space-x-6">
-                    <Link href="/" className="flex items-center space-x-2.5 group">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-4 lg:gap-6">
+                    <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
                         <div className="h-9 w-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
                             <Lock className="h-5 w-5" />
                         </div>
-                        <span className="font-bold text-xl tracking-tight">Seal</span>
+                        <span className="hidden font-bold text-xl tracking-tight sm:inline">Seal</span>
                     </Link>
 
-                    <span className="text-muted-foreground/30 font-light text-lg">/</span>
+                    <span className="hidden shrink-0 text-muted-foreground/30 font-light text-lg sm:inline">/</span>
 
                     {/* Workspace Switcher */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="h-9 px-3 font-medium flex items-center space-x-2 border border-border/40 hover:bg-muted/60"
+                                className="h-9 min-w-0 max-w-37.5 sm:max-w-none px-2 sm:px-3 font-medium flex items-center gap-2 border border-border/40 hover:bg-muted/60"
                             >
-                                <Building2 className="h-4 w-4 text-muted-foreground" />
-                                <span className="truncate max-w-[140px]">
+                                <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                <span className="truncate">
                                     {currentWorkspace ? currentWorkspace.name : "Select Workspace"}
                                 </span>
-                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-1" />
+                                <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="w-56">
@@ -121,35 +131,56 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Nav items */}
-                    <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-border/40">
+                    {/* Nav items: inline from lg up, behind a menu below that */}
+                    <nav className="hidden lg:flex shrink-0 items-center gap-1 pl-4 border-l border-border/40">
                         {navItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive =
-                                pathname === item.href ||
-                                (item.href !== `/w/${wsSlug}` && pathname.startsWith(item.href));
                             return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                                        isActive
-                                            ? "bg-secondary text-secondary-foreground shadow-sm"
-                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                                    }`}
-                                >
-                                    <Icon className="h-4 w-4" />
+                                <Link key={item.href} href={item.href} className={linkClass(isActiveItem(item.href))}>
+                                    <Icon className="h-4 w-4 shrink-0" />
                                     <span>{item.label}</span>
                                 </Link>
                             );
                         })}
                     </nav>
+
+                    {navItems.length > 0 && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Open workspace navigation"
+                                    className="lg:hidden shrink-0 h-9 w-9 rounded-lg"
+                                >
+                                    <Menu className="h-5 w-5" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="w-52">
+                                {navItems.map((item) => {
+                                    const Icon = item.icon;
+                                    return (
+                                        <DropdownMenuItem
+                                            key={item.href}
+                                            onClick={() => router.push(item.href)}
+                                            className={`cursor-pointer gap-2 whitespace-nowrap ${
+                                                isActiveItem(item.href) ? "bg-muted font-semibold" : ""
+                                            }`}
+                                        >
+                                            <Icon className="h-4 w-4 text-muted-foreground" />
+                                            {item.label}
+                                        </DropdownMenuItem>
+                                    );
+                                })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
 
                 {/* Right: Actions & Profile */}
-                <div className="flex items-center space-x-3">
+                <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                     {userRole && (
-                        <span className="hidden sm:inline-flex text-xs font-mono uppercase px-2 py-0.5 rounded-full border border-primary/30 bg-primary/10 text-primary font-semibold">
+                        <span className="hidden xl:inline-flex text-xs font-mono uppercase px-2 py-0.5 rounded-full border border-primary/30 bg-primary/10 text-primary font-semibold">
                             Role: {userRole}
                         </span>
                     )}
@@ -159,7 +190,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                         variant="ghost"
                         size="icon"
                         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                        className="h-9 w-9 rounded-lg"
+                        className="relative h-9 w-9 shrink-0 rounded-lg"
                     >
                         <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                         <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -169,14 +200,17 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                     {/* User Menu */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-9 px-2.5 flex items-center space-x-2 rounded-lg">
-                                <div className="h-7 w-7 rounded-full bg-primary/20 text-primary font-semibold text-xs flex items-center justify-center border border-primary/30">
+                            <Button
+                                variant="ghost"
+                                className="h-9 shrink-0 px-2 sm:px-2.5 flex items-center gap-2 rounded-lg"
+                            >
+                                <div className="h-7 w-7 shrink-0 rounded-full bg-primary/20 text-primary font-semibold text-xs flex items-center justify-center border border-primary/30">
                                     {user?.name?.charAt(0).toUpperCase() || "U"}
                                 </div>
-                                <span className="hidden sm:inline-block font-medium text-sm truncate max-w-[100px]">
+                                <span className="hidden sm:inline-block font-medium text-sm truncate max-w-25">
                                     {user?.name || "Account"}
                                 </span>
-                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                                <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56">

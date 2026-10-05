@@ -21,7 +21,7 @@ interface TokensTableProps {
 
 export function TokensTable({ loading, tokens, isAdminOrOwner, onRevokeClick }: TokensTableProps) {
     return (
-        <Table>
+        <Table className="min-w-190">
             <TableHeader>
                 <TableRow className="hover:bg-transparent">
                     <TableHead className="font-semibold">Name</TableHead>
