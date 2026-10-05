@@ -29,7 +29,11 @@ export function ExportSecretsDialog({ open, onOpenChange, envName, exportData }:
                     <DialogDescription>Decrypted secret values for the current environment.</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3 py-2">
-                    <Textarea readOnly value={exportData} className="font-mono text-xs min-h-[220px] bg-muted/50" />
+                    <Textarea
+                        readOnly
+                        value={exportData}
+                        className="font-mono text-xs min-h-[220px] max-h-[40vh] field-sizing-fixed bg-muted/50 break-words"
+                    />
                 </div>
                 <DialogFooter>
                     <Button

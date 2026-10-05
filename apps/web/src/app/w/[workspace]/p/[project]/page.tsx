@@ -111,7 +111,7 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
                         <h1 className="text-3xl font-bold tracking-tight">{projectDetail?.name}</h1>
                     </div>
 
-                    <div className="flex items-center space-x-3">
+                    <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
                         <Button variant="outline" onClick={secretsManager.openExportModal} className="font-medium">
                             <Download className="mr-2 h-4 w-4" /> Export
                         </Button>
@@ -136,7 +136,7 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
                 </div>
 
                 {projectDetail && (
-                    <Tabs value={activeEnv?.id} onValueChange={handleEnvChange} className="w-full space-y-6">
+                    <Tabs value={activeEnv?.id ?? ""} onValueChange={handleEnvChange} className="w-full space-y-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <TabsList className="bg-muted/60 p-1">
                                 {projectDetail.environments.map((env) => (
