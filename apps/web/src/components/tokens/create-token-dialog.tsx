@@ -14,36 +14,40 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { EnvironmentDto } from "@repo/core";
+import type { ProjectDetailDto } from "@repo/core";
 
 interface CreateTokenDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    environments: EnvironmentDto[];
-    initialEnvId: string;
+    /** Projects with their environments. A token is scoped to one environment. */
+    projects: ProjectDetailDto[];
     onCreateToken: (envId: string, name: string, ipAllowlist: string) => Promise<void>;
 }
 
-export function CreateTokenDialog({
-    open,
-    onOpenChange,
-    environments,
-    initialEnvId,
-    onCreateToken,
-}: CreateTokenDialogProps) {
-    const [selectedEnvId, setSelectedEnvId] = useState(initialEnvId);
+export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken }: CreateTokenDialogProps) {
+    const [selectedProjectId, setSelectedProjectId] = useState("");
+    const [selectedEnvId, setSelectedEnvId] = useState("");
     const [tokenName, setTokenName] = useState("");
     const [ipAllowlist, setIpAllowlist] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // Fall back to the first project and its first environment whenever the
+    // stored choice is empty or no longer present, so the dialog stays correct
+    // as projects load in the background.
+    const projectOptions = projects.filter((p) => p.environments.length > 0);
+    const activeProjectId = projectOptions.some((p) => p.id === selectedProjectId)
+        ? selectedProjectId
+        : (projectOptions[0]?.id ?? "");
+    const projectEnvs = projectOptions.find((p) => p.id === activeProjectId)?.environments ?? [];
+    const activeEnvId = projectEnvs.some((e) => e.id === selectedEnvId) ? selectedEnvId : (projectEnvs[0]?.id ?? "");
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const targetEnv = selectedEnvId || initialEnvId;
-        if (!targetEnv) return;
+        if (!activeEnvId) return;
         setLoading(true);
 
         try {
-            await onCreateToken(targetEnv, tokenName, ipAllowlist);
+            await onCreateToken(activeEnvId, tokenName, ipAllowlist);
             setTokenName("");
             setIpAllowlist("");
             onOpenChange(false);
@@ -64,22 +68,45 @@ export function CreateTokenDialog({
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label>Environment</Label>
+                            <Label>Project</Label>
                             <Select
-                                value={selectedEnvId || initialEnvId}
-                                onValueChange={(val) => setSelectedEnvId(val)}
+                                value={activeProjectId}
+                                onValueChange={(val) => {
+                                    setSelectedProjectId(val);
+                                    // The environment list belongs to the new project.
+                                    setSelectedEnvId("");
+                                }}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select environment" />
+                                    <SelectValue placeholder="Select project" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {environments.map((e) => (
-                                        <SelectItem key={e.id} value={e.id}>
-                                            {e.name}
+                                    {projectOptions.map((p) => (
+                                        <SelectItem key={p.id} value={p.id}>
+                                            {p.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Environment</Label>
+                            <Select value={activeEnvId} onValueChange={setSelectedEnvId}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select environment" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {projectEnvs.map((env) => (
+                                        <SelectItem key={env.id} value={env.id}>
+                                            {env.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                The token can only read secrets in this environment.
+                            </p>
                         </div>
 
                         <div className="space-y-2">
@@ -97,17 +124,20 @@ export function CreateTokenDialog({
                             <Label htmlFor="ip">IP Allowlist (optional, comma-separated)</Label>
                             <Input
                                 id="ip"
-                                placeholder="192.168.1.1, 10.0.0.0/24"
+                                placeholder="192.168.1.1, 203.0.113.10"
                                 value={ipAllowlist}
                                 onChange={(e) => setIpAllowlist(e.target.value)}
                             />
+                            <p className="text-xs text-muted-foreground">
+                                Exact IP addresses only. CIDR ranges are not supported.
+                            </p>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={loading || !tokenName || !(selectedEnvId || initialEnvId)}>
+                        <Button type="submit" disabled={loading || !tokenName || !activeEnvId}>
                             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Generate Token"}
                         </Button>
                     </DialogFooter>

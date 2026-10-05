@@ -11,7 +11,7 @@ import { CreateTokenDialog } from "@/components/tokens/create-token-dialog";
 import { PlainTokenDialog } from "@/components/tokens/plain-token-dialog";
 import { RevokeTokenDialog } from "@/components/tokens/revoke-token-dialog";
 import { client } from "@/lib/api-client";
-import type { WorkspaceSummaryDto, EnvironmentDto, UserDto } from "@repo/core";
+import type { WorkspaceSummaryDto, ProjectDetailDto, UserDto } from "@repo/core";
 import { toast } from "sonner";
 
 export default function WorkspaceTokensPage({ params }: { params: Promise<{ workspace: string }> }) {
@@ -22,12 +22,11 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
     const [user, setUser] = useState<UserDto>();
     const [workspaces, setWorkspaces] = useState<WorkspaceSummaryDto[]>([]);
     const [currentWorkspace, setCurrentWorkspace] = useState<WorkspaceSummaryDto>();
-    const [environments, setEnvironments] = useState<EnvironmentDto[]>([]);
+    const [projectDetails, setProjectDetails] = useState<ProjectDetailDto[]>([]);
     const [tokens, setTokens] = useState<ServiceTokenItem[]>([]);
 
     // Modals
     const [createOpen, setCreateOpen] = useState(false);
-    const [selectedEnvId, setSelectedEnvId] = useState("");
     const [plainTokenModal, setPlainTokenModal] = useState<string | null>(null);
     const [revokeTarget, setRevokeTarget] = useState<ServiceTokenItem | null>(null);
     const [revokeLoading, setRevokeLoading] = useState(false);
@@ -49,13 +48,13 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
 
             const projRes = await client.listProjects(ws.id);
 
-            const allEnvs: EnvironmentDto[] = [];
+            const details: ProjectDetailDto[] = [];
             const tokenItems: ServiceTokenItem[] = [];
 
             for (const p of projRes.projects) {
                 const detail = await client.getProject(p.id);
+                details.push(detail);
                 for (const env of detail.environments) {
-                    allEnvs.push(env);
                     try {
                         const tokRes = await client.listServiceTokens(env.id);
                         if (tokRes.tokens) {
@@ -74,9 +73,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
                 }
             }
 
-            setEnvironments(allEnvs);
-            const firstEnv = allEnvs.length > 0 ? allEnvs[0] : null;
-            if (firstEnv) setSelectedEnvId(firstEnv.id);
+            setProjectDetails(details);
             setTokens(tokenItems);
         } catch (err: any) {
             toast.error(err.message || "Failed to load tokens");
@@ -164,8 +161,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
                 <CreateTokenDialog
                     open={createOpen}
                     onOpenChange={setCreateOpen}
-                    environments={environments}
-                    initialEnvId={selectedEnvId}
+                    projects={projectDetails}
                     onCreateToken={handleCreateToken}
                 />
 

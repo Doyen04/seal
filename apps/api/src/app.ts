@@ -13,6 +13,7 @@ import { accountRoutes } from "./routes/account.js";
 import { authRoutes } from "./routes/auth.js";
 import { projectRoutes } from "./routes/projects.js";
 import { secretRoutes } from "./routes/secrets.js";
+import { tokenRoutes } from "./routes/tokens.js";
 import { workspaceRoutes } from "./routes/workspaces.js";
 
 /**
@@ -57,6 +58,7 @@ export function createApp(getDeps: () => Deps) {
     app.route("/", workspaceRoutes);
     app.route("/", projectRoutes);
     app.route("/", secretRoutes);
+    app.route("/", tokenRoutes);
 
     app.notFound((c) => c.json({ error: { code: "NOT_FOUND", message: "Not found" } }, 404));
 
@@ -73,7 +75,7 @@ export function createApp(getDeps: () => Deps) {
             JSON.stringify({
                 requestId: c.get("requestId"),
                 error: err.name,
-                err: err,//remove when am done
+                err: err, //remove when am done
                 ...(err instanceof ConfigError ? { message: err.message } : {}),
             }),
         );

@@ -2,8 +2,13 @@ import { z } from "zod";
 
 export const createServiceTokenSchema = z.object({
     name: z.string().trim().min(1).max(100),
-    expiresAt: z.string().optional(),
-    ipAllowlist: z.array(z.string().trim().min(1).max(100)).optional(),
+    /** Exact timestamps only. Ranges are not accepted; expiry is enforced on use. */
+    expiresAt: z.iso.datetime().optional(),
+    /** Exact IP addresses, matched as strings. CIDR ranges are not supported. */
+    ipAllowlist: z
+        .array(z.union([z.ipv4(), z.ipv6()]))
+        .max(50)
+        .optional(),
 });
 export type CreateServiceTokenInput = z.infer<typeof createServiceTokenSchema>;
 
