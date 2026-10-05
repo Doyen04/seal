@@ -2,6 +2,7 @@ import { createApiClient } from "@repo/core";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { apiBaseUrl, webOrigin } from "@/lib/server-api";
+import { toUserMessage } from "@/lib/error-message";
 
 export async function POST(request: Request) {
     try {
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
             {
                 error: {
                     code: error.code || "UNAUTHENTICATED",
-                    message: error.message || "Login failed",
+                    message: toUserMessage(error, "Login failed"),
                     details: error.details,
                 },
             },

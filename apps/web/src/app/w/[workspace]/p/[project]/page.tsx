@@ -21,6 +21,7 @@ import { useSecrets } from "@/hooks/use-secrets";
 import { client } from "@/lib/api-client";
 import type { WorkspaceSummaryDto, ProjectDetailDto, EnvironmentDto, UserDto } from "@repo/core";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 export default function ProjectSecretsPage({ params }: { params: Promise<{ workspace: string; project: string }> }) {
     const { workspace: workspaceSlug, project: projectSlug } = use(params);
@@ -68,7 +69,7 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
                 secretsManager.loadSecrets(defaultEnv.id);
             }
         } catch (err: any) {
-            toast.error(err.message || "Failed to load project details");
+            toast.error(toUserMessage(err, "Failed to load project details"));
         } finally {
             setLoading(false);
         }

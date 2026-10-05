@@ -73,6 +73,8 @@ export function TokensTable({ loading, tokens, isAdminOrOwner, onRevokeClick }: 
                                         size="icon"
                                         onClick={() => onRevokeClick(tok)}
                                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                        aria-label={`Revoke service token ${tok.name}`}
+                                        title="Revoke token"
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>

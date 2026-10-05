@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { client } from "@/lib/api-client";
+import { toUserMessage } from "@/lib/error-message";
 import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
@@ -24,7 +25,7 @@ export default function ForgotPasswordPage() {
             setSubmitted(true);
             toast.success("Password reset request sent");
         } catch (err: any) {
-            toast.error(err.message || "Request failed");
+            toast.error(toUserMessage(err, "Request failed"));
         } finally {
             setLoading(false);
         }

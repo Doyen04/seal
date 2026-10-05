@@ -14,25 +14,43 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    accessMapToInput,
+    EnvironmentAccessPicker,
+    type AccessMap,
+    type AccessPickerProject,
+} from "./environment-access-picker";
+import type { AccessOverride } from "@repo/core";
 
 interface InviteMemberDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     workspaceName?: string;
-    onInvite: (email: string, role: "admin" | "editor" | "viewer") => Promise<void>;
+    projects: AccessPickerProject[];
+    onInvite: (
+        email: string,
+        role: "admin" | "editor" | "viewer",
+        access: { environmentId: string; access: AccessOverride }[],
+    ) => Promise<void>;
 }
 
-export function InviteMemberDialog({ open, onOpenChange, workspaceName, onInvite }: InviteMemberDialogProps) {
+export function InviteMemberDialog({ open, onOpenChange, workspaceName, projects, onInvite }: InviteMemberDialogProps) {
     const [email, setEmail] = useState("");
     const [role, setRole] = useState<"admin" | "editor" | "viewer">("editor");
+    const [access, setAccess] = useState<AccessMap>({});
     const [loading, setLoading] = useState(false);
+
+    // Owners and admins always have full access, so per-environment overrides
+    // would be silently ignored. Offering them would be misleading.
+    const overridesApply = role !== "admin";
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await onInvite(email, role);
+            await onInvite(email, role, overridesApply ? accessMapToInput(access) : []);
             setEmail("");
+            setAccess({});
             onOpenChange(false);
         } finally {
             setLoading(false);
@@ -41,7 +59,7 @@ export function InviteMemberDialog({ open, onOpenChange, workspaceName, onInvite
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Invite Team Member</DialogTitle>
@@ -67,9 +85,9 @@ export function InviteMemberDialog({ open, onOpenChange, workspaceName, onInvite
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Workspace Role</Label>
+                            <Label htmlFor="invite-role">Workspace Role</Label>
                             <Select value={role} onValueChange={(val: any) => setRole(val)}>
-                                <SelectTrigger>
+                                <SelectTrigger id="invite-role">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -79,6 +97,10 @@ export function InviteMemberDialog({ open, onOpenChange, workspaceName, onInvite
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {overridesApply && (
+                            <EnvironmentAccessPicker projects={projects} value={access} onChange={setAccess} />
+                        )}
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>

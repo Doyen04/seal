@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { client } from "@/lib/api-client";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 function ResetPasswordForm() {
     const router = useRouter();
@@ -30,7 +31,7 @@ function ResetPasswordForm() {
             setSuccess(true);
             toast.success("Password reset successfully!");
         } catch (err: any) {
-            toast.error(err.message || "Password reset failed");
+            toast.error(toUserMessage(err, "Password reset failed"));
         } finally {
             setLoading(false);
         }

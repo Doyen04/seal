@@ -190,6 +190,13 @@ export const invitations = pgTable(
         tokenHash: text("token_hash").notNull().unique(),
         expiresAt: timestamptz("expires_at").notNull(),
         acceptedAt: timestamptz("accepted_at"),
+        // Per-environment permissions chosen by the inviter. Held here because
+        // environment_access is keyed by user id, which does not exist until the
+        // recipient accepts and signs in.
+        accessOverrides: jsonb("access_overrides")
+            .$type<{ environmentId: string; access: AccessOverride }[]>()
+            .notNull()
+            .default([]),
         invitedBy: uuid("invited_by")
             .notNull()
             .references(() => users.id),

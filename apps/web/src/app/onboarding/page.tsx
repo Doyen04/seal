@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { client } from "@/lib/api-client";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 export default function OnboardingPage() {
     const router = useRouter();
@@ -36,7 +37,7 @@ export default function OnboardingPage() {
             toast.success(`Workspace "${ws.name}" created!`);
             router.push(`/w/${ws.slug}`);
         } catch (err: any) {
-            toast.error(err.message || "Failed to create workspace");
+            toast.error(toUserMessage(err, "Failed to create workspace"));
         } finally {
             setLoading(false);
         }

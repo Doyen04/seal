@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { client } from "@/lib/api-client";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 function VerifyEmailForm() {
     const router = useRouter();
@@ -28,7 +29,7 @@ function VerifyEmailForm() {
             toast.success("Email verified!");
         } catch (err: any) {
             setStatus("error");
-            setErrorMessage(err.message || "Verification failed");
+            setErrorMessage(toUserMessage(err, "Verification failed"));
         }
     };
 

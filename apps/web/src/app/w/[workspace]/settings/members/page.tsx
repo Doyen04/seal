@@ -14,6 +14,7 @@ import type { AccessPickerProject } from "@/components/members/environment-acces
 import { client } from "@/lib/api-client";
 import type { WorkspaceSummaryDto, MemberDto, UserDto, RotationChecklistEntry, AccessOverride } from "@repo/core";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 export default function WorkspaceMembersPage({ params }: { params: Promise<{ workspace: string }> }) {
     const { workspace: workspaceSlug } = use(params);
@@ -72,7 +73,7 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
             );
             setProjects(withEnvs);
         } catch (err: any) {
-            toast.error(err.message || "Failed to load members");
+            toast.error(toUserMessage(err, "Failed to load members"));
         } finally {
             setLoading(false);
         }
@@ -93,7 +94,7 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
             toast.success(`Invitation sent to ${email}!`);
             loadData();
         } catch (err: any) {
-            toast.error(err.message || "Failed to send invitation");
+            toast.error(toUserMessage(err, "Failed to send invitation"));
             throw err;
         }
     };
@@ -111,7 +112,7 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
                 setMembers(fresh.members);
             }
         } catch (err: any) {
-            toast.error(err.message || "Failed to load current access");
+            toast.error(toUserMessage(err, "Failed to load current access"));
             setAccessOpen(false);
         } finally {
             setAccessLoading(false);
@@ -126,7 +127,7 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
             const fresh = await client.listMembers(currentWorkspace.id);
             setMembers(fresh.members);
         } catch (err: any) {
-            toast.error(err.message || "Failed to update environment access");
+            toast.error(toUserMessage(err, "Failed to update environment access"));
             throw err;
         }
     };
@@ -138,7 +139,7 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
             toast.success(`Updated ${member.name || member.email}'s role to ${newRole}`);
             loadData();
         } catch (err: any) {
-            toast.error(err.message || "Failed to update member role");
+            toast.error(toUserMessage(err, "Failed to update member role"));
         }
     };
 
@@ -158,7 +159,7 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
                 setRemoveTarget(null);
             }
         } catch (err: any) {
-            toast.error(err.message || "Failed to remove member");
+            toast.error(toUserMessage(err, "Failed to remove member"));
             setRemoveOpen(false);
         } finally {
             setRemoveLoading(false);

@@ -4,10 +4,12 @@ import { useState } from "react";
 import { client } from "@/lib/api-client";
 import type { EnvironmentDto, SecretMetaDto, SecretVersionDto } from "@repo/core";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 export function useSecrets(activeEnv?: EnvironmentDto) {
     const [secrets, setSecrets] = useState<SecretMetaDto[]>([]);
     const [loadingSecrets, setLoadingSecrets] = useState(false);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [revealedValues, setRevealedValues] = useState<Record<string, string>>({});
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -20,6 +22,7 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
 
     const [conflictOpen, setConflictOpen] = useState(false);
     const [conflictServerVersion, setConflictServerVersion] = useState<number | null>(null);
+    const [conflictPendingValue, setConflictPendingValue] = useState("");
 
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<SecretMetaDto | null>(null);
@@ -40,8 +43,16 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
             const res = await client.listSecrets(envId);
             setSecrets(res.secrets);
             setRevealedValues({});
+            setLoadError(null);
         } catch (err: any) {
-            toast.error(err.message || "Failed to load secrets");
+            // Clear first. Keeping the previous list meant a failed fetch after
+            // switching environments rendered the old environment's keys and
+            // decrypted values under the newly selected tab, and a failed first
+            // load looked like an empty environment.
+            setSecrets([]);
+            setRevealedValues({});
+            setLoadError(toUserMessage(err, "Failed to load secrets"));
+            toast.error(toUserMessage(err, "Failed to load secrets"));
         } finally {
             setLoadingSecrets(false);
         }
@@ -68,7 +79,7 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
                 });
             }, 30_000);
         } catch (err: any) {
-            toast.error(err.message || "Failed to decrypt secret value");
+            toast.error(toUserMessage(err, "Failed to decrypt secret value"));
         }
     };
 
@@ -96,7 +107,7 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
             toast.success(`Secret "${key}" created!`);
             loadSecrets(activeEnv.id);
         } catch (err: any) {
-            toast.error(err.message || "Failed to add secret");
+            toast.error(toUserMessage(err, "Failed to add secret"));
             throw err;
         }
     };
@@ -131,10 +142,16 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
             loadSecrets(activeEnv.id);
         } catch (err: any) {
             if (err.status === 409) {
+                // Remember what the user actually typed. editValue still holds
+                // the value fetched when the dialog opened, so the conflict
+                // dialog was showing the stale server value under the heading
+                // "Your Pending Value".
+                setConflictPendingValue(valueToSave);
                 setConflictServerVersion(err.details?.serverVersion || null);
+                setEditOpen(false);
                 setConflictOpen(true);
             } else {
-                toast.error(err.message || "Failed to update secret");
+                toast.error(toUserMessage(err, "Failed to update secret"));
             }
         } finally {
             setEditLoading(false);
@@ -152,7 +169,7 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
             setDeleteTarget(null);
             loadSecrets(activeEnv.id);
         } catch (err: any) {
-            toast.error(err.message || "Failed to delete secret");
+            toast.error(toUserMessage(err, "Failed to delete secret"));
         } finally {
             setDeleteLoading(false);
         }
@@ -188,7 +205,7 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
             toast.success(`Bulk import completed (${res.applied.length} secrets processed)!`);
             loadSecrets(activeEnv.id);
         } catch (err: any) {
-            toast.error(err.message || "Bulk import failed");
+            toast.error(toUserMessage(err, "Bulk import failed"));
             throw err;
         }
     };
@@ -203,7 +220,7 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
             setExportData(envStr);
             setExportOpen(true);
         } catch (err: any) {
-            toast.error(err.message || "Failed to export secrets");
+            toast.error(toUserMessage(err, "Failed to export secrets"));
         }
     };
 
@@ -216,7 +233,7 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
             const res = await client.listSecretVersions(sec.id);
             setVersions(res.versions);
         } catch (err: any) {
-            toast.error(err.message || "Failed to load version history");
+            toast.error(toUserMessage(err, "Failed to load version history"));
         } finally {
             setHistoryLoading(false);
         }
@@ -230,13 +247,14 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
             setHistoryOpen(false);
             loadSecrets(activeEnv.id);
         } catch (err: any) {
-            toast.error(err.message || "Rollback failed");
+            toast.error(toUserMessage(err, "Rollback failed"));
         }
     };
 
     return {
         secrets,
         loadingSecrets,
+        loadError,
         revealedValues,
         copiedKey,
         loadSecrets,
@@ -261,6 +279,7 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
         conflictOpen,
         setConflictOpen,
         conflictServerVersion,
+        conflictPendingValue,
         deleteOpen,
         setDeleteOpen,
         deleteTarget,

@@ -28,9 +28,11 @@ import type {
     CreateEnvironmentInput,
     CreateProjectInput,
     CreateWorkspaceInput,
+    EnvironmentAccessInput,
     EnvironmentDto,
     InvitationDto,
     InviteMemberInput,
+    MemberAccessDto,
     MemberDto,
     ProjectDetailDto,
     ProjectDto,
@@ -199,6 +201,10 @@ export function createApiClient(options: ApiClientOptions) {
         acceptInvitation: (token: string) => post<{ workspace: WorkspaceDto }>("/invitations/accept", { token }),
         updateMember: (workspaceId: string, userId: string, input: UpdateMemberInput) =>
             patch<{ member: MemberDto }>(`/workspaces/${enc(workspaceId)}/members/${enc(userId)}`, input),
+        updateMemberAccess: (workspaceId: string, userId: string, access: EnvironmentAccessInput[]) =>
+            put<{ access: MemberAccessDto[] }>(`/workspaces/${enc(workspaceId)}/members/${enc(userId)}/access`, {
+                access,
+            }),
         removeMember: (workspaceId: string, userId: string) =>
             del<RemoveMemberResponse>(`/workspaces/${enc(workspaceId)}/members/${enc(userId)}`),
         audit: (workspaceId: string, query: Partial<AuditQuery> = {}) =>

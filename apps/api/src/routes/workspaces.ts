@@ -19,6 +19,7 @@ import {
     and,
     auditLogs,
     desc,
+    devices,
     environmentAccess,
     environments,
     eq,
@@ -27,6 +28,7 @@ import {
     isNull,
     projects,
     secrets,
+    serviceTokens,
     sql,
     users,
     workspaceMembers,
@@ -615,6 +617,11 @@ interface AuditCursor {
     id: string;
 }
 
+/** Distinct non-null actor ids of one type on this page, for name lookups. */
+function uniqIds(page: { actorType: string; actorId: string | null }[], actorType: string): string[] {
+    return [...new Set(page.filter((r) => r.actorType === actorType && r.actorId).map((r) => r.actorId as string))];
+}
+
 function encodeCursor(cursor: AuditCursor): string {
     return Buffer.from(JSON.stringify(cursor)).toString("base64url");
 }
@@ -668,11 +675,39 @@ workspaceRoutes.get("/workspaces/:wid/audit", anyUser, async (c) => {
     const last = page[page.length - 1];
     const hasMore = rows.length > query.limit;
 
+    // Resolve a display name per actor so the log shows who acted rather than a
+    // bare identifier. Done per page, per actor type, rather than with a join,
+    // because the actor id points at three different tables depending on type.
+    const userIds = uniqIds(page, "user");
+    const deviceIds = uniqIds(page, "device");
+    const tokenIds = uniqIds(page, "service_token");
+
+    const [userRows, deviceRows, tokenRows] = await Promise.all([
+        userIds.length > 0
+            ? db.select({ id: users.id, name: users.name }).from(users).where(inArray(users.id, userIds))
+            : Promise.resolve([]),
+        deviceIds.length > 0
+            ? db.select({ id: devices.id, name: devices.name }).from(devices).where(inArray(devices.id, deviceIds))
+            : Promise.resolve([]),
+        tokenIds.length > 0
+            ? db
+                  .select({ id: serviceTokens.id, name: serviceTokens.name })
+                  .from(serviceTokens)
+                  .where(inArray(serviceTokens.id, tokenIds))
+            : Promise.resolve([]),
+    ]);
+
+    const actorNames = new Map<string, string>();
+    for (const row of [...userRows, ...deviceRows, ...tokenRows]) {
+        actorNames.set(row.id, row.name);
+    }
+
     const response: AuditPageDto = {
         entries: page.map((row) => ({
             id: row.id,
             actorType: row.actorType,
             actorId: row.actorId,
+            actorName: row.actorId ? (actorNames.get(row.actorId) ?? null) : null,
             action: row.action,
             targetType: row.targetType,
             targetId: row.targetId,

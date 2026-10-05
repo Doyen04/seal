@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { client } from "@/lib/api-client";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -28,7 +29,7 @@ export default function SignupPage() {
             setRegistered(true);
             toast.success("Account created successfully!");
         } catch (err: any) {
-            toast.error(err.message || "Failed to create account");
+            toast.error(toUserMessage(err, "Failed to create account"));
         } finally {
             setLoading(false);
         }

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 function LoginForm() {
     const router = useRouter();
@@ -38,7 +39,7 @@ function LoginForm() {
             const returnTo = searchParams.get("returnTo") || "/";
             router.push(returnTo);
         } catch (err: any) {
-            toast.error(err.message || "Failed to sign in");
+            toast.error(toUserMessage(err, "Failed to sign in"));
         } finally {
             setLoading(false);
         }

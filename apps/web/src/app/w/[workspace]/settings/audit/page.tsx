@@ -9,9 +9,11 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { AuditEntryDetailDialog } from "@/components/audit/audit-entry-detail-dialog";
 import { client } from "@/lib/api-client";
 import type { WorkspaceDto, AuditEntryDto, UserDto, AuditQuery } from "@repo/core";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 export default function WorkspaceAuditPage({ params }: { params: Promise<{ workspace: string }> }) {
     const { workspace: workspaceSlug } = use(params);
@@ -23,6 +25,7 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
     const [currentWorkspace, setCurrentWorkspace] = useState<WorkspaceDto>();
     const [entries, setEntries] = useState<AuditEntryDto[]>([]);
     const [nextCursor, setNextCursor] = useState<string | null>(null);
+    const [detailEntry, setDetailEntry] = useState<AuditEntryDto | null>(null);
 
     const [actorFilter, setActorFilter] = useState<string>("all");
     const [actionFilter, setActionFilter] = useState<string>("all");
@@ -60,7 +63,7 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
             const page = await fetchPage(cursor, { actor: actorFilter, action: actionFilter });
             if (page) setEntries(page);
         } catch (err: any) {
-            toast.error(err.message || "Failed to load audit logs");
+            toast.error(toUserMessage(err, "Failed to load audit logs"));
         } finally {
             setLoading(false);
         }
@@ -76,7 +79,7 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                 setCursorHistory((prev) => [...prev, nextCursor]);
             }
         } catch (err: any) {
-            toast.error(err.message || "Failed to load audit logs");
+            toast.error(toUserMessage(err, "Failed to load audit logs"));
         } finally {
             setLoading(false);
         }
@@ -94,7 +97,7 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                 setCursorHistory((prev) => prev.slice(0, targetIndex));
             }
         } catch (err: any) {
-            toast.error(err.message || "Failed to load audit logs");
+            toast.error(toUserMessage(err, "Failed to load audit logs"));
         } finally {
             setLoading(false);
         }
@@ -209,7 +212,18 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                                 </TableRow>
                             ) : (
                                 entries.map((entry) => (
-                                    <TableRow key={entry.id} className="hover:bg-muted/40 font-mono text-xs">
+                                    <TableRow
+                                        key={entry.id}
+                                        className="hover:bg-muted/40 font-mono text-xs cursor-pointer"
+                                        onClick={() => setDetailEntry(entry)}
+                                        tabIndex={0}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                setDetailEntry(entry);
+                                            }
+                                        }}
+                                    >
                                         <TableCell className="text-muted-foreground">
                                             {new Date(entry.createdAt).toLocaleString()}
                                         </TableCell>
@@ -217,13 +231,15 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                                             <div className="flex items-center space-x-2">
                                                 <Badge
                                                     variant="outline"
-                                                    className="flex items-center space-x-1 capitalize font-normal"
+                                                    className="flex shrink-0 items-center space-x-1 capitalize font-normal"
                                                 >
                                                     {getActorIcon(entry.actorType)}
                                                     <span>{entry.actorType}</span>
                                                 </Badge>
-                                                <span className="truncate max-w-[120px] text-muted-foreground">
-                                                    {entry.actorId ? `${entry.actorId.slice(0, 8)}...` : "—"}
+                                                {/* Name, truncated. Clicking the row
+                                                    opens the full details. */}
+                                                <span className="max-w-40 truncate font-sans text-xs text-foreground">
+                                                    {entry.actorName ?? entry.actorId?.slice(0, 8) ?? "—"}
                                                 </span>
                                             </div>
                                         </TableCell>
@@ -280,6 +296,8 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                         </div>
                     )}
                 </Card>
+
+                <AuditEntryDetailDialog entry={detailEntry} onOpenChange={(open) => !open && setDetailEntry(null)} />
             </main>
         </div>
     );

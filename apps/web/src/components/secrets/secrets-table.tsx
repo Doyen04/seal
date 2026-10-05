@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, Eye, EyeOff, History, Loader2, Lock, Pencil, Trash2 } from "lucide-react";
+import { AlertTriangle, Check, Copy, Eye, EyeOff, History, Loader2, Lock, Pencil, Trash2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ interface SecretsTableProps {
     revealedValues: Record<string, string>;
     copiedKey: string | null;
     isViewer: boolean;
+    loadError?: string | null;
     onReveal: (key: string) => void;
     onCopy: (key: string) => void;
     onHistoryClick: (sec: SecretMetaDto) => void;
@@ -25,6 +26,7 @@ export function SecretsTable({
     revealedValues,
     copiedKey,
     isViewer,
+    loadError,
     onReveal,
     onCopy,
     onHistoryClick,
@@ -47,6 +49,16 @@ export function SecretsTable({
                         <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
                             <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
                             Loading secrets...
+                        </TableCell>
+                    </TableRow>
+                ) : loadError ? (
+                    // A failed fetch must never be presented as an empty
+                    // environment; the two mean very different things.
+                    <TableRow>
+                        <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                            <AlertTriangle className="h-6 w-6 mx-auto mb-2 text-destructive" />
+                            <p className="font-medium text-foreground">Could not load secrets</p>
+                            <p className="text-xs mt-1">{loadError}</p>
                         </TableCell>
                     </TableRow>
                 ) : secrets.length === 0 ? (

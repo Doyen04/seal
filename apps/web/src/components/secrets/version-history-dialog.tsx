@@ -63,7 +63,10 @@ export function VersionHistoryDialog({
                                     </p>
                                 </div>
 
-                                {!isViewer && (
+                                {/* A deletion version has no value to restore, and the API rejects it
+                                    outright (secrets.ts:302), so do not offer the
+                                    button at all. */}
+                                {!isViewer && ver.op !== "delete" && (
                                     <Button
                                         size="sm"
                                         variant="ghost"

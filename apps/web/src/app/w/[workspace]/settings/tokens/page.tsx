@@ -13,6 +13,7 @@ import { RevokeTokenDialog } from "@/components/tokens/revoke-token-dialog";
 import { client } from "@/lib/api-client";
 import type { WorkspaceSummaryDto, ProjectDetailDto, UserDto } from "@repo/core";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 export default function WorkspaceTokensPage({ params }: { params: Promise<{ workspace: string }> }) {
     const { workspace: workspaceSlug } = use(params);
@@ -76,7 +77,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
             setProjectDetails(details);
             setTokens(tokenItems);
         } catch (err: any) {
-            toast.error(err.message || "Failed to load tokens");
+            toast.error(toUserMessage(err, "Failed to load tokens"));
         } finally {
             setLoading(false);
         }
@@ -101,7 +102,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
             setPlainTokenModal(res.token);
             loadData();
         } catch (err: any) {
-            toast.error(err.message || "Failed to create service token");
+            toast.error(toUserMessage(err, "Failed to create service token"));
             throw err;
         }
     };
@@ -116,7 +117,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
             setTokens(tokens.filter((t) => t.id !== revokeTarget.id));
             setRevokeTarget(null);
         } catch (err: any) {
-            toast.error(err.message || "Failed to revoke token");
+            toast.error(toUserMessage(err, "Failed to revoke token"));
         } finally {
             setRevokeLoading(false);
         }

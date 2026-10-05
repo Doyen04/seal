@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { client } from "@/lib/api-client";
 import type { WorkspaceSummaryDto, ProjectDto, UserDto } from "@repo/core";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 export default function WorkspaceProjectsPage({ params }: { params: Promise<{ workspace: string }> }) {
     const { workspace: workspaceSlug } = use(params);
@@ -58,7 +59,7 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
             const projRes = await client.listProjects(target.id);
             setProjects(projRes.projects);
         } catch (err: any) {
-            toast.error(err.message || "Failed to load workspace");
+            toast.error(toUserMessage(err, "Failed to load workspace"));
         } finally {
             setLoading(false);
         }
@@ -96,7 +97,7 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
             setProjectSlug("");
             loadData();
         } catch (err: any) {
-            toast.error(err.message || "Failed to create project");
+            toast.error(toUserMessage(err, "Failed to create project"));
         } finally {
             setCreating(false);
         }

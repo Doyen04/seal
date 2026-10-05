@@ -19,6 +19,7 @@ import {
 import { client } from "@/lib/api-client";
 import type { DeviceDto, UserDto, WorkspaceDto } from "@repo/core";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/error-message";
 
 export default function AccountDevicesPage() {
     const router = useRouter();
@@ -39,7 +40,7 @@ export default function AccountDevicesPage() {
             const devRes = await client.listDevices();
             setDevices(devRes.devices);
         } catch (err: any) {
-            toast.error(err.message || "Failed to load devices");
+            toast.error(toUserMessage(err, "Failed to load devices"));
         } finally {
             setLoading(false);
         }
@@ -59,7 +60,7 @@ export default function AccountDevicesPage() {
             setDevices(devices.filter((d) => d.id !== revokeTarget.id));
             setRevokeTarget(null);
         } catch (err: any) {
-            toast.error(err.message || "Failed to revoke device");
+            toast.error(toUserMessage(err, "Failed to revoke device"));
         } finally {
             setRevokeLoading(false);
         }
