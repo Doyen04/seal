@@ -72,9 +72,11 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
           ]
         : [];
 
-    const navItems = allNavItems
-        .filter((item) => rank >= ROLE_RANK[item.minRole])
-        .map(({ minRole: _minRole, ...item }) => item);
+    // A caller that omits userRole gets every item rather than none. Filtering to
+    // an empty list previously made the navigation vanish entirely on any page
+    // that forgot the prop.
+    const navItems = userRole ? allNavItems.filter((item) => rank >= ROLE_RANK[item.minRole]) : allNavItems;
+    const visibleNavItems = navItems.map(({ minRole: _minRole, ...item }) => item);
 
     const isActiveItem = (href: string) => pathname === href || (href !== `/w/${wsSlug}` && pathname.startsWith(href));
 
@@ -146,7 +148,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
 
                     {/* Nav items: inline from xl up, behind a menu below that */}
                     <nav className="hidden xl:flex shrink-0 items-center gap-1 pl-4 border-l border-border/40">
-                        {navItems.map((item) => {
+                        {visibleNavItems.map((item) => {
                             const Icon = item.icon;
                             return (
                                 <Link key={item.href} href={item.href} className={linkClass(isActiveItem(item.href))}>
@@ -157,7 +159,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                         })}
                     </nav>
 
-                    {navItems.length > 0 && (
+                    {visibleNavItems.length > 0 && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -170,7 +172,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="w-52">
-                                {navItems.map((item) => {
+                                {visibleNavItems.map((item) => {
                                     const Icon = item.icon;
                                     return (
                                         <DropdownMenuItem

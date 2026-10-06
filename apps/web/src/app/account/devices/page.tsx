@@ -72,6 +72,9 @@ export default function AccountDevicesPage() {
                 currentWorkspace={workspaces.length > 0 ? workspaces[0] : undefined}
                 workspaces={workspaces}
                 user={user}
+                // Without this the navbar had no role to filter with and rendered
+                // no navigation items at all.
+                userRole={workspaces[0]?.role}
             />
 
             <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6">
