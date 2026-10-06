@@ -15,11 +15,10 @@ export interface ServiceTokenItem extends ServiceTokenDto {
 interface TokensTableProps {
     loading: boolean;
     tokens: ServiceTokenItem[];
-    isAdminOrOwner: boolean;
     onRevokeClick: (token: ServiceTokenItem) => void;
 }
 
-export function TokensTable({ loading, tokens, isAdminOrOwner, onRevokeClick }: TokensTableProps) {
+export function TokensTable({ loading, tokens, onRevokeClick }: TokensTableProps) {
     return (
         <Table className="min-w-190">
             <TableHeader>
@@ -67,18 +66,19 @@ export function TokensTable({ loading, tokens, isAdminOrOwner, onRevokeClick }: 
                                 {tok.lastUsedAt ? new Date(tok.lastUsedAt).toLocaleString() : "Never"}
                             </TableCell>
                             <TableCell className="text-right">
-                                {isAdminOrOwner && (
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => onRevokeClick(tok)}
-                                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                        aria-label={`Revoke service token ${tok.name}`}
-                                        title="Revoke token"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                )}
+                                {/* Always offered: the API refuses to revoke
+                                        tokens this member did not create unless
+                                        they are an admin or owner. */}
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => onRevokeClick(tok)}
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    aria-label={`Revoke service token ${tok.name}`}
+                                    title="Revoke token"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
                             </TableCell>
                         </TableRow>
                     ))

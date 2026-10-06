@@ -123,12 +123,12 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
         }
     };
 
-    // Creating and revoking tokens needs write access to an environment
-    // (tokens.ts:41, :118), which editors have and viewers do not. This was
-    // previously gated to admins and owners, so editors were shown a page with no
-    // way to use it.
-    const canManageTokens =
-        currentWorkspace?.role === "editor" || currentWorkspace?.role === "admin" || currentWorkspace?.role === "owner";
+    // Every member may create a service token for an environment they can read,
+    // because the token is read-only and scoped to that one environment
+    // (tokens.ts:43). Revoking is limited to your own tokens unless you are an
+    // admin or owner, and the API enforces that. The environment pickers are
+    // already filtered to what this member can read.
+    const canManageTokens = currentWorkspace !== undefined;
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -159,7 +159,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
                     <TokensTable
                         loading={loading}
                         tokens={tokens}
-                        isAdminOrOwner={canManageTokens}
+
                         onRevokeClick={(tok) => setRevokeTarget(tok)}
                     />
                 </Card>

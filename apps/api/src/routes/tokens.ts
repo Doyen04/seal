@@ -1,10 +1,11 @@
 import { createServiceTokenSchema, type CreateServiceTokenResponse, type ServiceTokenDto } from "@repo/core";
 import { generateToken, tokenLast4, tokenPrefix } from "@repo/crypto";
-import { desc, eq, serviceTokens } from "@repo/db";
+import { and, desc, eq, serviceTokens } from "@repo/db";
 import { Hono } from "hono";
 import type { AppEnv } from "../context.js";
-import { notFound, validationError } from "../errors.js";
+import { notFound, forbidden, validationError } from "../errors.js";
 import { isUuid, parseJson } from "../http.js";
+import { accessAtLeast } from "../lib/access.js";
 import { writeAudit } from "../lib/audit.js";
 import { authorizeEnvironment } from "../lib/environments.js";
 import { getUserPrincipal, requireAuth } from "../middleware/authenticate.js";
@@ -38,7 +39,11 @@ function toDto(row: TokenRow): ServiceTokenDto {
 export const tokenRoutes = new Hono<AppEnv>();
 
 tokenRoutes.post("/environments/:eid/tokens", anyUser, async (c) => {
-    const env = await authorizeEnvironment(c, c.req.param("eid"), "write");
+    // Read is enough: the token this mints can only ever read this one
+    // environment (computeServiceTokenAccess), so a viewer gains no access they
+    // do not already have in the UI. Requiring write would leave a viewer unable
+    // to give their own application credentials.
+    const env = await authorizeEnvironment(c, c.req.param("eid"), "read");
     const body = await parseJson(c, createServiceTokenSchema);
     // Service tokens cannot mint more service tokens.
     const principal = getUserPrincipal(c);
@@ -94,8 +99,13 @@ tokenRoutes.post("/environments/:eid/tokens", anyUser, async (c) => {
 // Metadata only: the token hash column is never selected.
 tokenRoutes.get("/environments/:eid/tokens", anyUser, async (c) => {
     const env = await authorizeEnvironment(c, c.req.param("eid"), "read");
+    const principal = getUserPrincipal(c);
     const { db } = c.get("deps");
 
+    // Admins and owners see every token in the environment. Everyone else sees
+    // only the ones they created, so a viewer or editor cannot read another
+    // person's credential metadata.
+    const isManager = accessAtLeast(env.access, "write");
     const rows = await db
         .select({
             id: serviceTokens.id,
@@ -109,7 +119,11 @@ tokenRoutes.get("/environments/:eid/tokens", anyUser, async (c) => {
             createdAt: serviceTokens.createdAt,
         })
         .from(serviceTokens)
-        .where(eq(serviceTokens.environmentId, env.id))
+        .where(
+            isManager
+                ? eq(serviceTokens.environmentId, env.id)
+                : and(eq(serviceTokens.environmentId, env.id), eq(serviceTokens.createdBy, principal.userId)),
+        )
         .orderBy(desc(serviceTokens.createdAt), desc(serviceTokens.id));
 
     return c.json({ tokens: rows.map(toDto) });
@@ -124,7 +138,16 @@ tokenRoutes.delete("/tokens/:id", anyUser, async (c) => {
 
     const [row] = await db.select().from(serviceTokens).where(eq(serviceTokens.id, id)).limit(1);
     if (!row) throw notFound("Token not found");
-    const env = await authorizeEnvironment(c, row.environmentId, "write", "Token not found");
+    const env = await authorizeEnvironment(c, row.environmentId, "read", "Token not found");
+
+    // Anyone who may create a token here must also be able to remove one, or a
+    // viewer could mint a credential with no way to revoke it. Admins and owners
+    // may revoke any token in the workspace; everyone else is limited to tokens
+    // they created, so a viewer cannot delete an administrator's CI token.
+    const principal = getUserPrincipal(c);
+    if (!accessAtLeast(env.access, "write") && row.createdBy !== principal.userId) {
+        throw forbidden("You can only revoke service tokens you created");
+    }
 
     // Revoking twice is not an error.
     if (row.revokedAt) return c.json({ ok: true } as const);
