@@ -36,10 +36,21 @@ export function ExportSecretsDialog({ open, onOpenChange, envName, exportData }:
                     />
                 </div>
                 <DialogFooter>
+                    <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+                        Close
+                    </Button>
                     <Button
-                        onClick={() => {
-                            navigator.clipboard.writeText(exportData);
-                            toast.success("Export copied to clipboard!");
+                        type="button"
+                        onClick={async () => {
+                            try {
+                                await navigator.clipboard.writeText(exportData);
+                                toast.success("Export copied to clipboard!");
+                            } catch {
+                                // The old code toasted success without awaiting
+                                // the write, so it claimed success even when the
+                                // clipboard was unavailable.
+                                toast.error("Could not copy to clipboard");
+                            }
                         }}
                     >
                         <Copy className="mr-2 h-4 w-4" /> Copy to Clipboard

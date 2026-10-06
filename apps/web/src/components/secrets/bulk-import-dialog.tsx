@@ -72,9 +72,10 @@ export function BulkImportDialog({ open, onOpenChange, envName, onImport }: Bulk
             setFileError(`"${file.name}" is larger than 256 KB. Split it into smaller imports.`);
             return;
         }
-        // The file picker filter cannot be trusted: drag-and-drop bypasses it
-        // entirely, and it cannot express names like ".env.local". So the
-        // file's own bytes have to be checked.
+        // The file picker's filter cannot be trusted as a correctness guarantee: it
+        // cannot express names like ".env.local" or ".env.production", a user
+        // can override it, and it does not apply to files supplied any other way.
+        // So the bytes themselves have to be checked.
         try {
             const detected = await fileTypeFromBlob(file);
             if (detected) {

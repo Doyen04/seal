@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import { toUserMessage } from "@/lib/error-message";
 
 function LoginForm() {
@@ -36,7 +37,7 @@ function LoginForm() {
             }
 
             toast.success("Welcome back!");
-            const returnTo = searchParams.get("returnTo") || "/";
+            const returnTo = safeRedirectPath(searchParams.get("returnTo"));
             router.push(returnTo);
         } catch (err: any) {
             toast.error(toUserMessage(err, "Failed to sign in"));

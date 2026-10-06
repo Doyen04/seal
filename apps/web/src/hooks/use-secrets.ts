@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { client } from "@/lib/api-client";
 import type { EnvironmentDto, SecretMetaDto, SecretVersionDto } from "@repo/core";
 import { toast } from "sonner";
@@ -12,6 +12,27 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
     const [loadError, setLoadError] = useState<string | null>(null);
     const [revealedValues, setRevealedValues] = useState<Record<string, string>>({});
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+    const REVEAL_TIMEOUT_MS = 30_000;
+    const revealTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+    const clearRevealTimer = (key: string) => {
+        const existing = revealTimers.current.get(key);
+        if (existing !== undefined) {
+            clearTimeout(existing);
+            revealTimers.current.delete(key);
+        }
+    };
+
+    // Drop pending timers so a value cannot reappear or vanish after the
+    // component goes away.
+    useEffect(() => {
+        const timers = revealTimers.current;
+        return () => {
+            for (const timer of timers.values()) clearTimeout(timer);
+            timers.clear();
+        };
+    }, []);
 
     // Modal States
     const [addOpen, setAddOpen] = useState(false);
@@ -61,6 +82,9 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
     const handleReveal = async (key: string) => {
         if (!activeEnv) return;
         if (revealedValues[key] !== undefined) {
+            // Hide it now and cancel its pending auto-hide, otherwise that timer
+            // would fire later and wipe a value re-revealed in the meantime.
+            clearRevealTimer(key);
             const next = { ...revealedValues };
             delete next[key];
             setRevealedValues(next);
@@ -69,15 +93,18 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
 
         try {
             const sec = await client.getSecret(activeEnv.id, key);
+            clearRevealTimer(key);
             setRevealedValues((prev) => ({ ...prev, [key]: sec.value }));
 
-            setTimeout(() => {
+            const timer = setTimeout(() => {
+                revealTimers.current.delete(key);
                 setRevealedValues((prev) => {
                     const next = { ...prev };
                     delete next[key];
                     return next;
                 });
-            }, 30_000);
+            }, REVEAL_TIMEOUT_MS);
+            revealTimers.current.set(key, timer);
         } catch (err: any) {
             toast.error(toUserMessage(err, "Failed to decrypt secret value"));
         }
@@ -116,13 +143,19 @@ export function useSecrets(activeEnv?: EnvironmentDto) {
         if (!activeEnv) return;
         setEditTarget(sec);
         setEditValue("");
+        setEditLoading(true);
         try {
             const valDto = await client.getSecret(activeEnv.id, sec.key);
             setEditValue(valDto.value);
-        } catch {
-            // fallback
+            setEditOpen(true);
+        } catch (err: any) {
+            // Opening the dialog anyway dropped the user into an empty textarea
+            // that looked like a secret whose value was the empty string, with
+            // no message at all.
+            toast.error(toUserMessage(err, "Could not load this secret's current value"));
+        } finally {
+            setEditLoading(false);
         }
-        setEditOpen(true);
     };
 
     const handleEditSecret = async (valueToSave: string, forceOverwrite = false) => {

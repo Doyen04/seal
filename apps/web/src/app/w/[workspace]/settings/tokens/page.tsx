@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { AlertTriangle, Plus } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,6 +31,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
     const [plainTokenModal, setPlainTokenModal] = useState<string | null>(null);
     const [revokeTarget, setRevokeTarget] = useState<ServiceTokenItem | null>(null);
     const [revokeLoading, setRevokeLoading] = useState(false);
+    const [loadWarning, setLoadWarning] = useState<string | null>(null);
 
     const loadData = async () => {
         try {
@@ -51,6 +52,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
 
             const details: ProjectDetailDto[] = [];
             const tokenItems: ServiceTokenItem[] = [];
+            const failedEnvironments: string[] = [];
 
             for (const p of projRes.projects) {
                 const detail = await client.getProject(p.id);
@@ -68,14 +70,22 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
                                 });
                             });
                         }
-                    } catch {
-                        // empty if unauthorized or none
+                    } catch (err: any) {
+                        // Swallowing this made a failure look like "this
+                        // environment has no tokens", which invites duplicate
+                        // tokens. Record it and say so once at the end.
+                        failedEnvironments.push(`${p.name} / ${env.name}`);
                     }
                 }
             }
 
             setProjectDetails(details);
             setTokens(tokenItems);
+            if (failedEnvironments.length > 0) {
+                setLoadWarning(
+                    `Could not load tokens for ${failedEnvironments.length} environment(s): ${failedEnvironments.join(", ")}.`,
+                );
+            }
         } catch (err: any) {
             toast.error(toUserMessage(err, "Failed to load tokens"));
         } finally {
@@ -87,7 +97,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
         loadData();
     }, [workspaceSlug]);
 
-    const handleCreateToken = async (envId: string, name: string, ipAllowlistStr: string) => {
+    const handleCreateToken = async (envId: string, name: string, ipAllowlistStr: string, expiresAt: string | null) => {
         try {
             const ips = ipAllowlistStr
                 .split(",")
@@ -97,6 +107,7 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
             const res = await client.createServiceToken(envId, {
                 name,
                 ipAllowlist: ips.length > 0 ? ips : undefined,
+                expiresAt: expiresAt ?? undefined,
             });
 
             setPlainTokenModal(res.token);
@@ -156,6 +167,12 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
                 </div>
 
                 <Card className="border-border/60 shadow-sm">
+                    {loadWarning && (
+                        <div className="flex items-start gap-2 border-b border-border/40 bg-destructive/5 px-4 py-3 text-xs text-destructive">
+                            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                            <span>{loadWarning}</span>
+                        </div>
+                    )}
                     <TokensTable
                         loading={loading}
                         tokens={tokens}

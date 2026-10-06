@@ -599,12 +599,29 @@ workspaceRoutes.delete("/workspaces/:wid/members/:uid", anyUser, async (c) => {
                 ),
             );
         }
+        // A service token authenticates on its own and does not consult
+        // workspace membership, so removing someone would otherwise leave the
+        // credentials they minted working indefinitely.
+        const revoked = await tx
+            .update(serviceTokens)
+            .set({ revokedAt: new Date() })
+            .where(and(eq(serviceTokens.createdBy, uid), isNull(serviceTokens.revokedAt)))
+            .returning({ id: serviceTokens.id, name: serviceTokens.name });
+        for (const token of revoked) {
+            await writeAudit(tx, c, {
+                workspaceId: wid,
+                action: "token.revoke",
+                targetType: "service_token",
+                targetId: token.id,
+                metadata: { name: token.name, reason: "member removed" },
+            });
+        }
         await writeAudit(tx, c, {
             workspaceId: wid,
             action: "member.remove",
             targetType: "user",
             targetId: uid,
-            metadata: { role },
+            metadata: { role, revokedServiceTokens: revoked.length },
         });
     });
 

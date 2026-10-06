@@ -21,7 +21,7 @@ interface CreateTokenDialogProps {
     onOpenChange: (open: boolean) => void;
     /** Projects with their environments. A token is scoped to one environment. */
     projects: ProjectDetailDto[];
-    onCreateToken: (envId: string, name: string, ipAllowlist: string) => Promise<void>;
+    onCreateToken: (envId: string, name: string, ipAllowlist: string, expiresAt: string | null) => Promise<void>;
 }
 
 export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken }: CreateTokenDialogProps) {
@@ -29,7 +29,12 @@ export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken 
     const [selectedEnvId, setSelectedEnvId] = useState("");
     const [tokenName, setTokenName] = useState("");
     const [ipAllowlist, setIpAllowlist] = useState("");
+    const [expiresOn, setExpiresOn] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // The API requires the expiry to be in the future, so past dates are not
+    // offered in the first place.
+    const today = new Date().toISOString().slice(0, 10);
 
     // Fall back to the first project and its first environment whenever the
     // stored choice is empty or no longer present, so the dialog stays correct
@@ -47,9 +52,13 @@ export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken 
         setLoading(true);
 
         try {
-            await onCreateToken(activeEnvId, tokenName, ipAllowlist);
+            // The date input gives a day; treat it as the end of that day so a
+            // token set to expire "today" is not immediately stale.
+            const expiresAt = expiresOn ? new Date(`${expiresOn}T23:59:59`).toISOString() : null;
+            await onCreateToken(activeEnvId, tokenName, ipAllowlist, expiresAt);
             setTokenName("");
             setIpAllowlist("");
+            setExpiresOn("");
             onOpenChange(false);
         } finally {
             setLoading(false);
@@ -118,6 +127,21 @@ export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken 
                                 onChange={(e) => setTokenName(e.target.value)}
                                 required
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="texp">Expires (optional)</Label>
+                            <Input
+                                id="texp"
+                                type="date"
+                                value={expiresOn}
+                                min={today}
+                                onChange={(e) => setExpiresOn(e.target.value)}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Leave empty for a token that never expires. The token stops working at the end of the
+                                selected day.
+                            </p>
                         </div>
 
                         <div className="space-y-2">

@@ -28,7 +28,10 @@ function VerifyEmailForm() {
             setStatus("success");
             toast.success("Email verified!");
         } catch (err: any) {
-            setStatus("error");
+            // Stay editable on failure so the token can be retried. Previously
+            // the only input was hidden behind status === "idle", which left a
+            // terminal error screen with no way forward but a manual reload.
+            setStatus("idle");
             setErrorMessage(toUserMessage(err, "Verification failed"));
         }
     };
@@ -60,12 +63,14 @@ function VerifyEmailForm() {
                         ? "Email Verified!"
                         : status === "error"
                           ? "Verification Failed"
-                          : "Verify Email"}
+                          : errorMessage
+                            ? "Verification Failed"
+                            : "Verify Email"}
                 </CardTitle>
                 <CardDescription>
                     {status === "success"
                         ? "Your email address has been verified. You can now log in."
-                        : status === "error"
+                        : errorMessage
                           ? errorMessage
                           : "Enter your verification token below"}
                 </CardDescription>
