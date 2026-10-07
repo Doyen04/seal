@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { AlertTriangle, Plus } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { TokensTable, type ServiceTokenItem } from "@/components/tokens/tokens-table";
 import { CreateTokenDialog } from "@/components/tokens/create-token-dialog";
 import { PlainTokenDialog } from "@/components/tokens/plain-token-dialog";
@@ -173,12 +173,9 @@ export default function WorkspaceTokensPage({ params }: { params: Promise<{ work
                             <span>{loadWarning}</span>
                         </div>
                     )}
-                    <TokensTable
-                        loading={loading}
-                        tokens={tokens}
-
-                        onRevokeClick={(tok) => setRevokeTarget(tok)}
-                    />
+                    <CardContent>
+                        <TokensTable loading={loading} tokens={tokens} onRevokeClick={(tok) => setRevokeTarget(tok)} />
+                    </CardContent>
                 </Card>
 
                 <CreateTokenDialog

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { UserPlus, Users } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { MembersTable } from "@/components/members/members-table";
 import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
 import { RemoveMemberDialog } from "@/components/members/remove-member-dialog";
@@ -219,19 +219,21 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
                 </div>
 
                 <Card className="border-border/60 shadow-sm">
-                    <MembersTable
-                        loading={loading}
-                        members={members}
-                        user={user}
-                        isAdminOrOwner={isAdminOrOwner}
-                        onRoleChange={handleRoleChange}
-                        onAccessClick={openAccessEditor}
-                        onRemoveClick={(mem) => {
-                            setRemoveTarget(mem);
-                            setRotationChecklist(null);
-                            setRemoveOpen(true);
-                        }}
-                    />
+                    <CardContent>
+                        <MembersTable
+                            loading={loading}
+                            members={members}
+                            user={user}
+                            isAdminOrOwner={isAdminOrOwner}
+                            onRoleChange={handleRoleChange}
+                            onAccessClick={openAccessEditor}
+                            onRemoveClick={(mem) => {
+                                setRemoveTarget(mem);
+                                setRotationChecklist(null);
+                                setRemoveOpen(true);
+                            }}
+                        />
+                    </CardContent>
                 </Card>
 
                 <InviteMemberDialog

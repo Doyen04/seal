@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Laptop, Trash2, Loader2 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -88,76 +88,80 @@ export default function AccountDevicesPage() {
                 </div>
 
                 <Card className="border-border/60 shadow-sm">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="hover:bg-transparent">
-                                <TableHead className="font-semibold">Device Name</TableHead>
-                                <TableHead className="font-semibold">Platform</TableHead>
-                                <TableHead className="font-semibold">Last Active</TableHead>
-                                <TableHead className="font-semibold">Status</TableHead>
-                                <TableHead className="font-semibold text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                                        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
-                                        Loading devices...
-                                    </TableCell>
+                    {/* CardContent supplies the horizontal padding; the card
+                        itself only pads vertically. */}
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="font-semibold">Device Name</TableHead>
+                                    <TableHead className="font-semibold">Platform</TableHead>
+                                    <TableHead className="font-semibold">Last Active</TableHead>
+                                    <TableHead className="font-semibold">Status</TableHead>
+                                    <TableHead className="font-semibold text-right">Actions</TableHead>
                                 </TableRow>
-                            ) : devices.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-36 text-center text-muted-foreground">
-                                        <Laptop className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
-                                        <p className="font-medium text-foreground">No active devices</p>
-                                        <p className="text-xs mt-1">
-                                            Log in via CLI (`Seal login`) to connect a device.
-                                        </p>
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                devices.map((dev) => (
-                                    <TableRow key={dev.id} className="hover:bg-muted/40">
-                                        <TableCell className="font-medium">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                                                    <Laptop className="h-4 w-4" />
-                                                </div>
-                                                <span>{dev.name}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="capitalize text-sm text-muted-foreground">
-                                            {dev.platform || "Unknown"}
-                                        </TableCell>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            {dev.lastSeenAt ? new Date(dev.lastSeenAt).toLocaleString() : "Never"}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                variant="outline"
-                                                className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                                            >
-                                                Active
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => setRevokeTarget(dev)}
-                                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                                aria-label={`Revoke device ${dev.name}`}
-                                                title="Revoke device"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                            </TableHeader>
+                            <TableBody>
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                                            <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
+                                            Loading devices...
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                ) : devices.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-36 text-center text-muted-foreground">
+                                            <Laptop className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                                            <p className="font-medium text-foreground">No active devices</p>
+                                            <p className="text-xs mt-1">
+                                                Log in via CLI (`Seal login`) to connect a device.
+                                            </p>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    devices.map((dev) => (
+                                        <TableRow key={dev.id} className="hover:bg-muted/40">
+                                            <TableCell className="font-medium">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                                                        <Laptop className="h-4 w-4" />
+                                                    </div>
+                                                    <span>{dev.name}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="capitalize text-sm text-muted-foreground">
+                                                {dev.platform || "Unknown"}
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">
+                                                {dev.lastSeenAt ? new Date(dev.lastSeenAt).toLocaleString() : "Never"}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant="outline"
+                                                    className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                                                >
+                                                    Active
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => setRevokeTarget(dev)}
+                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                    aria-label={`Revoke device ${dev.name}`}
+                                                    title="Revoke device"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
                 </Card>
 
                 {/* Revoke Modal */}

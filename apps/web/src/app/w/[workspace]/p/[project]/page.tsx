@@ -7,7 +7,7 @@ import { Plus, Download, FileSpreadsheet, Search } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SecretsTable } from "@/components/secrets/secrets-table";
 import { AddSecretDialog } from "@/components/secrets/add-secret-dialog";
@@ -164,22 +164,24 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
 
                         <TabsContent value={activeEnv?.id || ""} className="m-0">
                             <Card className="border-border/60 shadow-sm">
-                                <SecretsTable
-                                    loading={loading || secretsManager.loadingSecrets}
-                                    secrets={filteredSecrets}
-                                    revealedValues={secretsManager.revealedValues}
-                                    copiedKey={secretsManager.copiedKey}
-                                    isViewer={isViewer}
-                                    loadError={secretsManager.loadError}
-                                    onReveal={secretsManager.handleReveal}
-                                    onCopy={secretsManager.handleCopy}
-                                    onHistoryClick={secretsManager.openHistoryModal}
-                                    onEditClick={secretsManager.openEditModal}
-                                    onDeleteClick={(sec) => {
-                                        secretsManager.setDeleteTarget(sec);
-                                        secretsManager.setDeleteOpen(true);
-                                    }}
-                                />
+                                <CardContent>
+                                    <SecretsTable
+                                        loading={loading || secretsManager.loadingSecrets}
+                                        secrets={filteredSecrets}
+                                        revealedValues={secretsManager.revealedValues}
+                                        copiedKey={secretsManager.copiedKey}
+                                        isViewer={isViewer}
+                                        loadError={secretsManager.loadError}
+                                        onReveal={secretsManager.handleReveal}
+                                        onCopy={secretsManager.handleCopy}
+                                        onHistoryClick={secretsManager.openHistoryModal}
+                                        onEditClick={secretsManager.openEditModal}
+                                        onDeleteClick={(sec) => {
+                                            secretsManager.setDeleteTarget(sec);
+                                            secretsManager.setDeleteOpen(true);
+                                        }}
+                                    />
+                                </CardContent>
                             </Card>
                         </TabsContent>
                     </Tabs>

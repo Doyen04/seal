@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { History, Shield, Loader2, ChevronLeft, ChevronRight, User, Laptop, Key } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -182,93 +182,96 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                 </div>
 
                 <Card className="border-border/60 shadow-sm">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="hover:bg-transparent">
-                                <TableHead className="font-semibold">Timestamp</TableHead>
-                                <TableHead className="font-semibold">Actor</TableHead>
-                                <TableHead className="font-semibold">Action</TableHead>
-                                <TableHead className="font-semibold">Target</TableHead>
-                                <TableHead className="font-semibold text-right">IP Address</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                                        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
-                                        Loading audit trail...
-                                    </TableCell>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="font-semibold">Timestamp</TableHead>
+                                    <TableHead className="font-semibold">Actor</TableHead>
+                                    <TableHead className="font-semibold">Action</TableHead>
+                                    <TableHead className="font-semibold">Target</TableHead>
+                                    <TableHead className="font-semibold text-right">IP Address</TableHead>
                                 </TableRow>
-                            ) : entries.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-36 text-center text-muted-foreground">
-                                        <History className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
-                                        <p className="font-medium text-foreground">No audit entries found</p>
-                                        <p className="text-xs mt-1">
-                                            Audit log records all security events in real-time.
-                                        </p>
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                entries.map((entry) => (
-                                    <TableRow
-                                        key={entry.id}
-                                        className="hover:bg-muted/40 font-mono text-xs cursor-pointer"
-                                        onClick={() => setDetailEntry(entry)}
-                                        tabIndex={0}
-                                        onKeyDown={(e) => {
-                                            if (e.key === "Enter" || e.key === " ") {
-                                                e.preventDefault();
-                                                setDetailEntry(entry);
-                                            }
-                                        }}
-                                    >
-                                        <TableCell className="text-muted-foreground">
-                                            {new Date(entry.createdAt).toLocaleString()}
+                            </TableHeader>
+                            <TableBody>
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                                            <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
+                                            Loading audit trail...
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center space-x-2">
-                                                <Badge
-                                                    variant="outline"
-                                                    className="flex shrink-0 items-center space-x-1 capitalize font-normal"
-                                                >
-                                                    {getActorIcon(entry.actorType)}
-                                                    <span>{entry.actorType}</span>
-                                                </Badge>
-                                                {/* Name, truncated. Clicking the row
+                                    </TableRow>
+                                ) : entries.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-36 text-center text-muted-foreground">
+                                            <History className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                                            <p className="font-medium text-foreground">No audit entries found</p>
+                                            <p className="text-xs mt-1">
+                                                Audit log records all security events in real-time.
+                                            </p>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    entries.map((entry) => (
+                                        <TableRow
+                                            key={entry.id}
+                                            className="hover:bg-muted/40 font-mono text-xs cursor-pointer"
+                                            onClick={() => setDetailEntry(entry)}
+                                            tabIndex={0}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter" || e.key === " ") {
+                                                    e.preventDefault();
+                                                    setDetailEntry(entry);
+                                                }
+                                            }}
+                                        >
+                                            <TableCell className="text-muted-foreground">
+                                                {new Date(entry.createdAt).toLocaleString()}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center space-x-2">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="flex shrink-0 items-center space-x-1 capitalize font-normal"
+                                                    >
+                                                        {getActorIcon(entry.actorType)}
+                                                        <span>{entry.actorType}</span>
+                                                    </Badge>
+                                                    {/* Name, truncated. Clicking the row
                                                     opens the full details. */}
-                                                <span className="max-w-40 truncate font-sans text-xs text-foreground">
-                                                    {entry.actorName ?? entry.actorId?.slice(0, 8) ?? "—"}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge className="font-mono text-[11px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 border-0">
-                                                {entry.action}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">
-                                            {entry.targetType
-                                                ? `${entry.targetType}:${entry.targetId ? entry.targetId.slice(0, 8) : ""}...`
-                                                : "—"}
-                                        </TableCell>
-                                        <TableCell className="text-right text-muted-foreground">
-                                            {/* Never invent an address: a row with no
+                                                    <span className="max-w-40 truncate font-sans text-xs text-foreground">
+                                                        {entry.actorName ?? entry.actorId?.slice(0, 8) ?? "—"}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge className="font-mono text-[11px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 border-0">
+                                                    {entry.action}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {entry.targetType
+                                                    ? `${entry.targetType}:${entry.targetId ? entry.targetId.slice(0, 8) : ""}...`
+                                                    : "—"}
+                                            </TableCell>
+                                            <TableCell className="text-right text-muted-foreground">
+                                                {/* Never invent an address: a row with no
                                                 recorded IP previously displayed
                                                 127.0.0.1, which reads as evidence
                                                 that the action came from localhost. */}
-                                            {entry.ip || "—"}
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                                {entry.ip || "—"}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
 
-                    {/* Pagination. Pages accumulate and Previous walks back through the cursor
-                    chain, because replacing the rows discarded whatever the user
-                    was already looking at. */}
+                    {/* Pagination sits outside CardContent so its top border still
+                    spans the full card width. Pages accumulate and Previous walks
+                    back through the cursor chain, because replacing the rows
+                    discarded whatever the user was already looking at. */}
                     {(nextCursor || cursorHistory.length > 0) && (
                         <div className="p-4 border-t border-border/40 flex items-center justify-between gap-3">
                             <span className="text-xs text-muted-foreground">
