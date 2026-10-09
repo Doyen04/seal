@@ -9,6 +9,7 @@ import {
     Users,
     Key,
     History,
+    Settings,
     Laptop,
     LogOut,
     ChevronDown,
@@ -62,13 +63,17 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
     const ROLE_RANK: Record<RoleName, number> = { viewer: 1, editor: 2, admin: 3, owner: 4 };
     const rank = userRole ? ROLE_RANK[userRole] : 0;
 
-    type NavItem = { label: string; href: string; icon: LucideIcon; minRole: RoleName };
+    type NavItem = { label: string; href: string; icon: LucideIcon; minRole: RoleName; exact?: boolean };
     const allNavItems: NavItem[] = wsSlug
         ? [
               { label: "Projects", href: `/w/${wsSlug}`, icon: FolderKanban, minRole: "viewer" },
-              { label: "Members", href: `/w/${wsSlug}/settings/members`, icon: Users, minRole: "editor" },
               { label: "Service Tokens", href: `/w/${wsSlug}/settings/tokens`, icon: Key, minRole: "viewer" },
+              { label: "Members", href: `/w/${wsSlug}/settings/members`, icon: Users, minRole: "editor" },
               { label: "Audit Log", href: `/w/${wsSlug}/settings/audit`, icon: History, minRole: "admin" },
+              // The settings index is the way into everything above, including
+              // the danger zone. `exact` stops it lighting up on its own
+              // children, which the prefix match below would otherwise do.
+              { label: "Settings", href: `/w/${wsSlug}/settings`, icon: Settings, minRole: "viewer", exact: true },
           ]
         : [];
 
@@ -78,7 +83,10 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
     const navItems = userRole ? allNavItems.filter((item) => rank >= ROLE_RANK[item.minRole]) : allNavItems;
     const visibleNavItems = navItems.map(({ minRole: _minRole, ...item }) => item);
 
-    const isActiveItem = (href: string) => pathname === href || (href !== `/w/${wsSlug}` && pathname.startsWith(href));
+    const isActiveItem = (item: { href: string; exact?: boolean }) => {
+        if (item.exact) return pathname === item.href;
+        return pathname === item.href || (item.href !== `/w/${wsSlug}` && pathname.startsWith(item.href));
+    };
 
     const linkClass = (isActive: boolean) =>
         `flex shrink-0 items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
@@ -151,7 +159,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                         {visibleNavItems.map((item) => {
                             const Icon = item.icon;
                             return (
-                                <Link key={item.href} href={item.href} className={linkClass(isActiveItem(item.href))}>
+                                <Link key={item.href} href={item.href} className={linkClass(isActiveItem(item))}>
                                     <Icon className="h-4 w-4 shrink-0" />
                                     <span>{item.label}</span>
                                 </Link>
@@ -179,7 +187,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                                             key={item.href}
                                             onClick={() => router.push(item.href)}
                                             className={`cursor-pointer gap-2 whitespace-nowrap ${
-                                                isActiveItem(item.href) ? "bg-muted font-semibold" : ""
+                                                isActiveItem(item) ? "bg-muted font-semibold" : ""
                                             }`}
                                         >
                                             <Icon className="h-4 w-4 text-muted-foreground" />

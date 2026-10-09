@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, UserPlus, Users } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,6 @@ import { MembersTable } from "@/components/members/members-table";
 import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
 import { RemoveMemberDialog } from "@/components/members/remove-member-dialog";
 import { EditMemberAccessDialog } from "@/components/members/edit-member-access-dialog";
-import { DeleteWorkspaceDialog } from "@/components/members/delete-workspace-dialog";
 import type { AccessPickerProject } from "@/components/members/environment-access-picker";
 import { client } from "@/lib/api-client";
 import type { WorkspaceSummaryDto, MemberDto, UserDto, RotationChecklistEntry, AccessOverride } from "@repo/core";
@@ -37,19 +36,6 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
     const [accessOpen, setAccessOpen] = useState(false);
     const [accessTarget, setAccessTarget] = useState<MemberDto | null>(null);
     const [accessLoading, setAccessLoading] = useState(false);
-    const [deleteWorkspaceOpen, setDeleteWorkspaceOpen] = useState(false);
-
-    const handleDeleteWorkspace = async (workspaceId: string) => {
-        await client.deleteWorkspace(workspaceId);
-    };
-
-    const handleWorkspaceDeleted = () => {
-        toast.success("Workspace deleted");
-        // The session is still valid but has no workspaces left, so onboarding
-        // is the only sensible destination.
-        router.push("/onboarding");
-        router.refresh();
-    };
 
     const loadData = async () => {
         try {
@@ -181,7 +167,6 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
     };
 
     const isAdminOrOwner = currentWorkspace?.role === "owner" || currentWorkspace?.role === "admin";
-    const isOwner = currentWorkspace?.role === "owner";
 
     // Viewers are not offered Members in the navigation; without this guard they
     // could still reach it by typing the address. The API allows viewers to list
@@ -250,37 +235,6 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
                         />
                     </CardContent>
                 </Card>
-
-                {/* Danger zone. Owner only, because deleting the workspace takes
-                    every project and secret in it with it. */}
-                {isOwner && (
-                    <Card className="border-destructive/40 bg-destructive/5">
-                        <CardContent className="space-y-4">
-                            <div>
-                                <h2 className="flex items-center gap-2 font-semibold text-destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                    Danger zone
-                                </h2>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    Deleting {currentWorkspace?.name} removes every project, environment, secret and
-                                    service token inside it. This cannot be undone.
-                                </p>
-                            </div>
-                            <Button variant="destructive" onClick={() => setDeleteWorkspaceOpen(true)}>
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete workspace
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )}
-
-                <DeleteWorkspaceDialog
-                    open={deleteWorkspaceOpen}
-                    onOpenChange={setDeleteWorkspaceOpen}
-                    workspaceName={currentWorkspace?.name}
-                    workspaceId={currentWorkspace?.id}
-                    deleteWorkspace={handleDeleteWorkspace}
-                    onDeleted={handleWorkspaceDeleted}
-                />
 
                 <InviteMemberDialog
                     open={inviteOpen}

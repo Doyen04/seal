@@ -3,8 +3,9 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FolderKanban, Plus, ArrowRight, Layers, Clock, Loader2, Search } from "lucide-react";
+import { FolderKanban, Plus, ArrowRight, Layers, Clock, Loader2, Search, Archive } from "lucide-react";
 import { Navbar } from "@/components/navbar";
+import { ArchiveProjectDialog } from "@/components/projects/archive-project-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -113,6 +114,22 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
     // Creating a project requires admin (projects.ts:78). Showing the button to
     // editors produced a guaranteed 403 with their input still in the dialog.
     const canCreateProject = currentWorkspace?.role === "owner" || currentWorkspace?.role === "admin";
+
+    const [archiveOpen, setArchiveOpen] = useState(false);
+    const [archiveTarget, setArchiveTarget] = useState<ProjectDto | null>(null);
+
+    const handleArchive = async () => {
+        if (!archiveTarget) return;
+        try {
+            await client.archiveProject(archiveTarget.id);
+            toast.success(`Archived ${archiveTarget.name}`);
+            setArchiveTarget(null);
+            loadData();
+        } catch (err: any) {
+            toast.error(toUserMessage(err, "Failed to archive project"));
+            throw err;
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -263,23 +280,51 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
                                     </div>
                                 </CardContent>
 
-                                <CardFooter className="pt-4 border-t border-border/40">
+                                <CardFooter className="pt-4 border-t border-border/40 flex-row items-center justify-between gap-2">
                                     <Button
                                         asChild
                                         variant="ghost"
-                                        className="w-full justify-between group-hover:bg-primary/10 group-hover:text-primary font-medium"
+                                        className="group-hover:bg-primary/10 group-hover:text-primary font-medium"
                                     >
                                         <Link href={`/w/${workspaceSlug}/p/${project.slug}`}>
                                             <span>Manage Secrets</span>
                                             <ArrowRight className="h-4 w-4" />
                                         </Link>
                                     </Button>
+                                    {/* Archive lives here as well as on the project
+                                        page, so projects can be removed from the
+                                        list without opening each one. */}
+                                    {canCreateProject && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon-sm"
+                                            onClick={() => {
+                                                setArchiveTarget(project);
+                                                setArchiveOpen(true);
+                                            }}
+                                            aria-label={`Archive ${project.name}`}
+                                            title="Archive project"
+                                            className="text-muted-foreground hover:text-destructive"
+                                        >
+                                            <Archive className="h-4 w-4" />
+                                        </Button>
+                                    )}
                                 </CardFooter>
                             </Card>
                         ))}
                     </div>
                 )}
             </main>
+
+            <ArchiveProjectDialog
+                open={archiveOpen}
+                onOpenChange={(next) => {
+                    setArchiveOpen(next);
+                    if (!next) setArchiveTarget(null);
+                }}
+                projectName={archiveTarget?.name}
+                onArchive={handleArchive}
+            />
         </div>
     );
 }
