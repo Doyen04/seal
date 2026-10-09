@@ -46,8 +46,8 @@ export function ArchiveProjectDialog({ open, onOpenChange, projectName, onArchiv
                         Archive {projectName || "this project"}?
                     </DialogTitle>
                     <DialogDescription>
-                        The project and its secrets stop appearing in the dashboard immediately. Nothing is erased,
-                        so this cannot be undone from the interface today.
+                        The project and its secrets stop appearing in the dashboard immediately. Nothing is erased, so
+                        this cannot be undone from the interface today.
                     </DialogDescription>
                 </DialogHeader>
 

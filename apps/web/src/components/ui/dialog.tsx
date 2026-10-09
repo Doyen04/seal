@@ -72,13 +72,7 @@ function DialogContent({
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
     // pr-8 reserves the gutter the absolutely positioned close button sits in, so
     // long titles no longer run underneath it on narrow screens.
-    return (
-        <div
-            data-slot="dialog-header"
-            className={cn("flex flex-col gap-2 pr-8", className)}
-            {...props}
-        />
-    );
+    return <div data-slot="dialog-header" className={cn("flex flex-col gap-2 pr-8", className)} {...props} />;
 }
 
 function DialogFooter({

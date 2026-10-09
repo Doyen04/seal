@@ -23,10 +23,13 @@ const line = {
 /** Closed Catmull-Rom curve through the points, converted to cubic beziers. */
 function smoothClosedPath(points: [number, number][]): string {
     const count = points.length;
-    const at = (index: number) => points[(index + count) % count];
+    // The modulo keeps the index in range for a closed curve, so the assertion
+    // is always safe; it just satisfies noUncheckedIndexedAccess.
+    const at = (index: number): [number, number] => points[(index + count) % count]!;
     const round = (value: number) => value.toFixed(2);
 
-    let path = `M ${round(points[0][0])} ${round(points[0][1])}`;
+    const first = at(0);
+    let path = `M ${round(first[0])} ${round(first[1])}`;
     for (let i = 0; i < count; i++) {
         const p0 = at(i - 1);
         const p1 = at(i);

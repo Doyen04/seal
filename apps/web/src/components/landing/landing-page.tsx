@@ -1,15 +1,5 @@
 import Link from "next/link";
-import {
-    ArrowRight,
-    Boxes,
-    Cpu,
-    Fingerprint,
-    GitBranch,
-    KeyRound,
-    ScrollText,
-    ShieldCheck,
-    Users,
-} from "lucide-react";
+import { ArrowRight, Boxes, Cpu, Fingerprint, GitBranch, KeyRound, ScrollText, ShieldCheck, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SealMark } from "./seal-mark";
 import { VersionLedger } from "./version-ledger";
@@ -123,9 +113,7 @@ function SiteNav({ dashboardHref, signedIn }: { dashboardHref: string; signedIn:
                 <Link href="/" className="group flex items-center gap-2.5">
                     <SealMark className="h-8 w-8 transition-transform duration-500 group-hover:scale-110" />
                     <span className="text-lg font-bold tracking-tight">Seal</span>
-                    <span className="hidden font-mono text-[10px] text-muted-foreground/50 sm:inline">
-                        // vault
-                    </span>
+                    <span className="hidden font-mono text-[10px] text-muted-foreground/50 sm:inline">// vault</span>
                 </Link>
 
                 <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
@@ -681,8 +669,8 @@ function SiteFooter({ dashboardHref, signedIn }: { dashboardHref: string; signed
                             <span className="text-lg font-bold tracking-tight">Seal</span>
                         </Link>
                         <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-                            A developer secrets vault. Versioned, encrypted per version, and reversible — so a
-                            rotated key never becomes a lost afternoon.
+                            A developer secrets vault. Versioned, encrypted per version, and reversible — so a rotated
+                            key never becomes a lost afternoon.
                         </p>
                         <p className="mt-5 flex items-center gap-2 font-mono text-[11px] text-muted-foreground/60">
                             <span className="h-1.5 w-1.5 rounded-full bg-foreground" />

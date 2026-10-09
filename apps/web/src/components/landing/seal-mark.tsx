@@ -28,8 +28,22 @@ export function SealMark({ className, animated = false }: { className?: string; 
                     fill="url(#seal-wax)"
                 />
                 {/* Pressed inner ring */}
-                <circle cx="24" cy="24" r="13.5" stroke="var(--color-background)" strokeOpacity="0.55" strokeWidth="1.25" />
-                <circle cx="24" cy="24" r="10" stroke="var(--color-background)" strokeOpacity="0.3" strokeWidth="0.75" />
+                <circle
+                    cx="24"
+                    cy="24"
+                    r="13.5"
+                    stroke="var(--color-background)"
+                    strokeOpacity="0.55"
+                    strokeWidth="1.25"
+                />
+                <circle
+                    cx="24"
+                    cy="24"
+                    r="10"
+                    stroke="var(--color-background)"
+                    strokeOpacity="0.3"
+                    strokeWidth="0.75"
+                />
                 {/* Monogram */}
                 <path
                     d="M28.8 18.6c-.9-1.5-2.5-2.3-4.6-2.3-2.9 0-5 1.9-5 4.9v5.6c0 3 2.1 4.9 5 4.9 2.1 0 3.7-.8 4.6-2.3"

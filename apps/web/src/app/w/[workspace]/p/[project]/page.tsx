@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Download, FileSpreadsheet, Search } from "lucide-react";
+import { Archive, Download, FileSpreadsheet, Plus, Search } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { EditSecretDialog } from "@/components/secrets/edit-secret-dialog";
 import { ConflictDialog } from "@/components/secrets/conflict-dialog";
 import { DeleteSecretDialog } from "@/components/secrets/delete-secret-dialog";
 import { BulkImportDialog } from "@/components/secrets/bulk-import-dialog";
+import { ArchiveProjectDialog } from "@/components/projects/archive-project-dialog";
 import { ExportSecretsDialog } from "@/components/secrets/export-secrets-dialog";
 import { VersionHistoryDialog } from "@/components/secrets/version-history-dialog";
 import { useSecrets } from "@/hooks/use-secrets";
@@ -34,6 +35,7 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
     const [projectDetail, setProjectDetail] = useState<ProjectDetailDto>();
     const [activeEnv, setActiveEnv] = useState<EnvironmentDto>();
     const [search, setSearch] = useState("");
+    const [archiveOpen, setArchiveOpen] = useState(false);
 
     const secretsManager = useSecrets(activeEnv);
 
@@ -89,6 +91,19 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
 
     const isViewer = currentWorkspace?.role === "viewer";
     const filteredSecrets = secretsManager.secrets.filter((s) => s.key.toLowerCase().includes(search.toLowerCase()));
+    const projectId = projectDetail?.id;
+
+    const handleArchiveProject = async () => {
+        if (!projectId) return;
+        try {
+            await client.archiveProject(projectId);
+            toast.success("Project archived");
+            router.push(`/w/${workspaceSlug}`);
+        } catch (err: any) {
+            toast.error(toUserMessage(err, "Failed to archive project"));
+            throw err;
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -133,8 +148,27 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
                                 </Button>
                             </>
                         )}
+                        {/* Archive is an admin action, so it stays hidden from viewers. */}
+                        {!isViewer && projectId && (
+                            <Button
+                                variant="ghost"
+                                onClick={() => setArchiveOpen(true)}
+                                className="text-muted-foreground hover:text-destructive"
+                                aria-label="Archive project"
+                                title="Archive project"
+                            >
+                                <Archive className="h-4 w-4" />
+                            </Button>
+                        )}
                     </div>
                 </div>
+
+                <ArchiveProjectDialog
+                    open={archiveOpen}
+                    onOpenChange={setArchiveOpen}
+                    projectName={projectDetail?.name}
+                    onArchive={handleArchiveProject}
+                />
 
                 {projectDetail && (
                     <Tabs value={activeEnv?.id ?? ""} onValueChange={handleEnvChange} className="w-full space-y-6">

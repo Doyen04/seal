@@ -111,7 +111,8 @@ export function EnvironmentAccessPicker({ projects, value, onChange, disabled }:
                             <>
                                 <Button
                                     type="button"
-                                    size="xs" className="h-8"
+                                    size="xs"
+                                    className="h-8"
                                     variant="ghost"
                                     disabled={disabled}
                                     onClick={() => setAllInProject(activeProject, undefined)}
@@ -120,7 +121,8 @@ export function EnvironmentAccessPicker({ projects, value, onChange, disabled }:
                                 </Button>
                                 <Button
                                     type="button"
-                                    size="xs" className="h-8"
+                                    size="xs"
+                                    className="h-8"
                                     variant="ghost"
                                     disabled={disabled}
                                     onClick={() => setAllInProject(activeProject, "read")}
@@ -178,7 +180,14 @@ export function EnvironmentAccessPicker({ projects, value, onChange, disabled }:
                                 <p className="text-xs font-medium">
                                     {summary.length} override{summary.length === 1 ? "" : "s"} across all projects
                                 </p>
-                                <Button type="button" size="xs" variant="ghost" className="h-8" disabled={disabled} onClick={clearAll}>
+                                <Button
+                                    type="button"
+                                    size="xs"
+                                    variant="ghost"
+                                    className="h-8"
+                                    disabled={disabled}
+                                    onClick={clearAll}
+                                >
                                     Clear all
                                 </Button>
                             </div>
@@ -200,9 +209,9 @@ export function EnvironmentAccessPicker({ projects, value, onChange, disabled }:
                                                     delete next[item.key];
                                                     onChange(next);
                                                 }}
-aria-label={`Remove override for ${item.projectName} ${item.environmentName}`}
-                                            className="-m-1 inline-flex size-7 shrink-0 items-center justify-center rounded-full transition-colors hover:text-foreground"
-                                        >
+                                                aria-label={`Remove override for ${item.projectName} ${item.environmentName}`}
+                                                className="-m-1 inline-flex size-7 shrink-0 items-center justify-center rounded-full transition-colors hover:text-foreground"
+                                            >
                                                 <X className="h-3 w-3" />
                                             </button>
                                         </Badge>

@@ -39,7 +39,7 @@ export default function SignupPage() {
     if (registered) {
         return (
             <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
-            <BackToHome className="absolute top-4 left-4" />
+                <BackToHome className="absolute top-4 left-4" />
                 <Card className="w-full max-w-md border-border/60 shadow-xl text-center">
                     <CardHeader className="space-y-3">
                         <div className="mx-auto h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">

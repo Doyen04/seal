@@ -49,8 +49,16 @@ const ROWS = [
 ];
 
 const LEVELS = {
-    none: { label: "none", className: "border-border/50 bg-muted/20 text-muted-foreground/50", dot: "bg-foreground/25" },
-    read: { label: "read", className: "border-foreground/25 bg-foreground/5 text-foreground/75", dot: "bg-foreground/60" },
+    none: {
+        label: "none",
+        className: "border-border/50 bg-muted/20 text-muted-foreground/50",
+        dot: "bg-foreground/25",
+    },
+    read: {
+        label: "read",
+        className: "border-foreground/25 bg-foreground/5 text-foreground/75",
+        dot: "bg-foreground/60",
+    },
     write: { label: "write", className: "border-foreground/50 bg-foreground/12 text-foreground", dot: "bg-foreground" },
 } as const;
 
@@ -68,7 +76,10 @@ export function AccessMatrix({ className }: { className?: string }) {
                 <div className="grid grid-cols-[1fr_repeat(3,auto)] items-center gap-x-1.5 pb-1 sm:gap-x-2">
                     <span />
                     {columns.map((column) => (
-                        <span key={column} className="w-11 text-center font-mono text-[9px] text-muted-foreground/60 sm:w-13">
+                        <span
+                            key={column}
+                            className="w-11 text-center font-mono text-[9px] text-muted-foreground/60 sm:w-13"
+                        >
                             {column.slice(0, 4)}
                         </span>
                     ))}

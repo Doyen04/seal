@@ -82,7 +82,9 @@ export function VersionLedger({ className }: { className?: string }) {
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-baseline gap-2">
                                     <span className="font-mono text-xs font-semibold">v{entry.version}</span>
-                                    <span className={cn("font-mono text-[10px] uppercase tracking-wide", meta.className)}>
+                                    <span
+                                        className={cn("font-mono text-[10px] uppercase tracking-wide", meta.className)}
+                                    >
                                         {entry.op}
                                     </span>
                                     <span className="ml-auto shrink-0 font-mono text-[10px] text-muted-foreground">

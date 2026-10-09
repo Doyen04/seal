@@ -100,12 +100,7 @@ export function DeleteWorkspaceDialog({
                     <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>
                         Cancel
                     </Button>
-                    <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={handleDelete}
-                        disabled={!matches || loading}
-                    >
+                    <Button type="button" variant="destructive" onClick={handleDelete} disabled={!matches || loading}>
                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         Delete workspace
                     </Button>
