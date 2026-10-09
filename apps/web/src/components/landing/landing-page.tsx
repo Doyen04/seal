@@ -6,10 +6,8 @@ import {
     Fingerprint,
     GitBranch,
     KeyRound,
-    Lock,
     ScrollText,
     ShieldCheck,
-    Terminal,
     Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -350,7 +350,8 @@ export function HistoryIllustration({ className }: { className?: string }) {
 /** A repeating hairline pattern used behind banners. */
 export function HairlineField({ className }: { className?: string }) {
     return (
-        <svg aria-hidden className={cn("h-full w-full", className)} fill="none" stroke="currentColor">
+        // Filled, not stroked: these are dots, so the root must not set fill="none".
+        <svg aria-hidden className={cn("h-full w-full", className)} fill="currentColor">
             {Array.from({ length: 14 }, (_, row) =>
                 Array.from({ length: 30 }, (_, column) => (
                     <circle
