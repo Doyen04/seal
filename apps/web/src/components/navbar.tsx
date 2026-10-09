@@ -106,7 +106,7 @@ export function Navbar({ currentWorkspace, workspaces = [], user, userRole }: Na
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="h-9 min-w-0 max-w-37.5 sm:max-w-none px-2 sm:px-3 font-medium flex items-center gap-2 border border-border/40 hover:bg-muted/60"
+                                className="h-9 min-w-0 max-w-24 px-2 font-medium flex items-center gap-2 border border-border/40 hover:bg-muted/60 sm:max-w-none sm:px-3"
                             >
                                 <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 <span className="truncate">

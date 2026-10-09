@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { KeyRound, Lock, Mail, ArrowRight, Loader2 } from "lucide-react";
+import { BackToHome } from "@/components/back-to-home";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -134,7 +135,8 @@ function LoginForm() {
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
+        <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
+            <BackToHome className="absolute top-4 left-4" />
             <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin text-primary" />}>
                 <LoginForm />
             </Suspense>

@@ -358,7 +358,7 @@ function Capabilities() {
                 />
 
                 <div className="mt-6 flex justify-center">
-                    <div className="w-full max-w-2xl opacity-80">
+                    <div className="w-full max-w-lg opacity-90">
                         <VersionDeckIllustration />
                     </div>
                 </div>
@@ -523,7 +523,7 @@ function Cryptography() {
                 />
 
                 <div className="mt-10 flex justify-center">
-                    <div className="w-full max-w-xl opacity-90">
+                    <div className="w-full max-w-lg opacity-90">
                         <KeyWrappingIllustration />
                     </div>
                 </div>

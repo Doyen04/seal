@@ -107,9 +107,9 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
                                 Projects
                             </Link>
                             <span>/</span>
-                            <span className="text-foreground font-medium">{projectDetail?.name}</span>
+                            <span className="truncate text-foreground font-medium">{projectDetail?.name}</span>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight">{projectDetail?.name}</h1>
+                        <h1 className="text-3xl font-bold tracking-tight break-words">{projectDetail?.name}</h1>
                     </div>
 
                     <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
@@ -139,12 +139,14 @@ export default function ProjectSecretsPage({ params }: { params: Promise<{ works
                 {projectDetail && (
                     <Tabs value={activeEnv?.id ?? ""} onValueChange={handleEnvChange} className="w-full space-y-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <TabsList className="bg-muted/60 p-1">
+                            {/* w-fit plus nowrap triggers meant the row took its
+                                max-content width and pushed the whole page sideways. */}
+                            <TabsList className="max-w-full overflow-x-auto bg-muted/60 p-1">
                                 {projectDetail.environments.map((env) => (
                                     <TabsTrigger
                                         key={env.id}
                                         value={env.id}
-                                        className="capitalize font-medium text-sm px-4 py-1.5"
+                                        className="shrink-0 capitalize font-medium text-sm px-4 py-1.5"
                                     >
                                         {env.name}
                                     </TabsTrigger>

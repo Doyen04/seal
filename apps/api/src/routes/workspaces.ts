@@ -629,6 +629,43 @@ workspaceRoutes.delete("/workspaces/:wid/members/:uid", anyUser, async (c) => {
     return c.json(response);
 });
 
+/**
+ * Deletes a workspace and everything under it. Cascades cover members,
+ * invitations, projects, environments, secrets, secret versions, service
+ * tokens and per-environment grants.
+ *
+ * Owner only: an admin can remove members and projects, but not the workspace
+ * itself. Audit rows are written with a null workspace id because the audit log
+ * for this workspace is about to be cascaded away with it.
+ */
+workspaceRoutes.delete("/workspaces/:wid", anyUser, async (c) => {
+    const wid = c.req.param("wid");
+    const { userId, role } = await requireWorkspaceRole(c, wid, "owner");
+    if (role !== "owner") throw forbidden("Only the workspace owner can delete it");
+
+    const { db } = c.get("deps");
+    const [workspace] = await db
+        .select({ name: workspaces.name, slug: workspaces.slug })
+        .from(workspaces)
+        .where(eq(workspaces.id, wid))
+        .limit(1);
+    if (!workspace) throw notFound("Workspace not found");
+
+    await db.delete(workspaces).where(eq(workspaces.id, wid));
+
+    // Kept deliberately: a trace that the workspace existed and who removed it,
+    // even though the workspace-scoped rows are gone.
+    await writeAudit(db, c, {
+        workspaceId: null,
+        action: "workspace.delete",
+        targetType: "workspace",
+        targetId: wid,
+        metadata: { name: workspace.name, slug: workspace.slug, deletedBy: userId },
+    });
+
+    return c.json({ ok: true } as const);
+});
+
 interface AuditCursor {
     t: string;
     id: string;

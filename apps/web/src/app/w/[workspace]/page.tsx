@@ -244,7 +244,7 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
                                         <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold">
                                             <Layers className="h-5 w-5" />
                                         </div>
-                                        <Badge variant="secondary" className="font-mono text-[11px]">
+                                        <Badge variant="secondary" className="max-w-[60%] truncate font-mono text-[11px]">
                                             {project.slug}
                                         </Badge>
                                     </div>

@@ -207,6 +207,8 @@ export function createApiClient(options: ApiClientOptions) {
             }),
         removeMember: (workspaceId: string, userId: string) =>
             del<RemoveMemberResponse>(`/workspaces/${enc(workspaceId)}/members/${enc(userId)}`),
+        /** Owner only. Cascades to projects, environments, secrets and tokens. */
+        deleteWorkspace: (workspaceId: string) => del<{ ok: true }>(`/workspaces/${enc(workspaceId)}`),
         audit: (workspaceId: string, query: Partial<AuditQuery> = {}) =>
             get<AuditPageDto>(`/workspaces/${enc(workspaceId)}/audit`, query),
 

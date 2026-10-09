@@ -67,7 +67,10 @@ export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken 
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            {/* Five stacked sections put this near 720px tall. Without a height
+                cap the centred dialog clips both ends and Generate Token ends up
+                off-screen with no way to scroll to it. */}
+            <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Create Service Token</DialogTitle>

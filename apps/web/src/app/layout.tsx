@@ -34,7 +34,9 @@ export default function RootLayout({
             >
                 <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
                     {children}
-                    <Toaster position="top-right" richColors />
+                    {/* Sonner pins mobile toasts to the top at 16px, which lands them
+                        on top of the 64px sticky navbar. 5rem clears it. */}
+                    <Toaster position="top-right" offset={{ top: "5rem" }} richColors />
                 </ThemeProvider>
             </body>
         </html>

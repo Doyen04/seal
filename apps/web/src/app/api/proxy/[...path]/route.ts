@@ -32,6 +32,16 @@ async function proxy(request: Request, context: { params: Promise<{ path: string
         headers["Cookie"] = `seal_session=${sessionToken}`;
     }
 
+    // Without this the API only ever sees this Next.js server's address, so
+    // every audit entry recorded `::1` locally and the internal hop address on
+    // Vercel, making the audit IP column useless. The platform sets this header
+    // on the request that reaches us, so pass it straight through and let the
+    // API's getClientIp pick the first entry.
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    if (forwardedFor) {
+        headers["X-Forwarded-For"] = forwardedFor;
+    }
+
     let body: string | undefined = undefined;
     if (request.method !== "GET" && request.method !== "HEAD") {
         body = await request.text();

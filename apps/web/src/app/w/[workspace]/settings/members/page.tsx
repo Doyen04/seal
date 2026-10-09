@@ -236,6 +236,37 @@ export default function WorkspaceMembersPage({ params }: { params: Promise<{ wor
                     </CardContent>
                 </Card>
 
+                {/* Danger zone. Owner only, because deleting the workspace takes
+                    every project and secret in it with it. */}
+                {isOwner && (
+                    <Card className="border-destructive/40 bg-destructive/5">
+                        <CardContent className="space-y-4">
+                            <div>
+                                <h2 className="flex items-center gap-2 font-semibold text-destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                    Danger zone
+                                </h2>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    Deleting {currentWorkspace?.name} removes every project, environment,
+                                    secret and service token inside it. This cannot be undone.
+                                </p>
+                            </div>
+                            <Button variant="destructive" onClick={() => setDeleteWorkspaceOpen(true)}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete workspace
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                <DeleteWorkspaceDialog
+                    open={deleteWorkspaceOpen}
+                    onOpenChange={setDeleteWorkspaceOpen}
+                    workspaceName={currentWorkspace?.name}
+                    workspaceId={currentWorkspace?.id}
+                    deleteWorkspace={handleDeleteWorkspace}
+                    onDeleted={handleWorkspaceDeleted}
+                />
+
                 <InviteMemberDialog
                     open={inviteOpen}
                     onOpenChange={setInviteOpen}

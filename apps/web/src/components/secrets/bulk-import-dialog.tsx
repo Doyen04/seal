@@ -116,7 +116,7 @@ export function BulkImportDialog({ open, onOpenChange, envName, onImport }: Bulk
                 onOpenChange(next);
             }}
         >
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Import .env File</DialogTitle>

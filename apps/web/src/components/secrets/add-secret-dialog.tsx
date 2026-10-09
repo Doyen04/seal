@@ -42,7 +42,7 @@ export function AddSecretDialog({ open, onOpenChange, envName, onAdd }: AddSecre
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Add Secret Key</DialogTitle>
@@ -69,7 +69,7 @@ export function AddSecretDialog({ open, onOpenChange, envName, onAdd }: AddSecre
                                 placeholder="sk_live_..."
                                 value={value}
                                 onChange={(e) => setValue(e.target.value)}
-                                className="font-mono text-sm min-h-[100px]"
+                                className="field-sizing-fixed max-h-[40vh] font-mono text-sm min-h-[100px]"
                                 required
                             />
                         </div>

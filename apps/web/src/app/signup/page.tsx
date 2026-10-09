@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Mail, User, KeyRound, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { BackToHome } from "@/components/back-to-home";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +38,8 @@ export default function SignupPage() {
 
     if (registered) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
+            <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
+            <BackToHome className="absolute top-4 left-4" />
                 <Card className="w-full max-w-md border-border/60 shadow-xl text-center">
                     <CardHeader className="space-y-3">
                         <div className="mx-auto h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
@@ -63,7 +65,8 @@ export default function SignupPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
+        <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
+            <BackToHome className="absolute top-4 left-4" />
             <div className="w-full max-w-md space-y-6">
                 <div className="flex flex-col items-center space-y-2 text-center">
                     <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-lg shadow-primary/5">

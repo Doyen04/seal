@@ -186,11 +186,11 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                         <Table>
                             <TableHeader>
                                 <TableRow className="hover:bg-transparent">
-                                    <TableHead className="font-semibold">Timestamp</TableHead>
-                                    <TableHead className="font-semibold">Actor</TableHead>
-                                    <TableHead className="font-semibold">Action</TableHead>
-                                    <TableHead className="font-semibold">Target</TableHead>
-                                    <TableHead className="font-semibold text-right">IP Address</TableHead>
+                                    <TableHead className="h-11 font-semibold">Timestamp</TableHead>
+                                    <TableHead className="h-11 font-semibold">Actor</TableHead>
+                                    <TableHead className="h-11 font-semibold">Action</TableHead>
+                                    <TableHead className="h-11 font-semibold">Target</TableHead>
+                                    <TableHead className="h-11 font-semibold text-right">IP Address</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -225,10 +225,10 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                                                 }
                                             }}
                                         >
-                                            <TableCell className="text-muted-foreground">
+                                            <TableCell className="py-3 text-muted-foreground">
                                                 {new Date(entry.createdAt).toLocaleString()}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="py-3">
                                                 <div className="flex items-center space-x-2">
                                                     <Badge
                                                         variant="outline"
@@ -244,17 +244,17 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="py-3">
                                                 <Badge className="font-mono text-[11px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 border-0">
                                                     {entry.action}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground">
+                                            <TableCell className="py-3 text-muted-foreground">
                                                 {entry.targetType
                                                     ? `${entry.targetType}:${entry.targetId ? entry.targetId.slice(0, 8) : ""}...`
                                                     : "—"}
                                             </TableCell>
-                                            <TableCell className="text-right text-muted-foreground">
+                                            <TableCell className="py-3 text-right text-muted-foreground">
                                                 {/* Never invent an address: a row with no
                                                 recorded IP previously displayed
                                                 127.0.0.1, which reads as evidence
@@ -282,6 +282,7 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    className="h-9"
                                     onClick={loadPreviousPage}
                                     disabled={loading || cursorHistory.length === 0}
                                 >
@@ -290,6 +291,7 @@ export default function WorkspaceAuditPage({ params }: { params: Promise<{ works
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    className="h-9"
                                     onClick={() => loadNextPage()}
                                     disabled={loading || !nextCursor}
                                 >

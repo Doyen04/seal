@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Loader2, ArrowRight } from "lucide-react";
+import { BackToHome } from "@/components/back-to-home";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -110,7 +111,8 @@ function VerifyEmailForm() {
 
 export default function VerifyEmailPage() {
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
+        <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/40 p-4">
+            <BackToHome className="absolute top-4 left-4" />
             <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin text-primary" />}>
                 <VerifyEmailForm />
             </Suspense>
