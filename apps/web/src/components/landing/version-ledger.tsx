@@ -25,7 +25,7 @@ export function VersionLedger({ className }: { className?: string }) {
     return (
         <div
             className={cn(
-                "relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-5 shadow-2xl backdrop-blur-sm",
+                "relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-4 shadow-2xl backdrop-blur-sm sm:p-5",
                 className,
             )}
         >
@@ -35,15 +35,19 @@ export function VersionLedger({ className }: { className?: string }) {
                 className="pointer-events-none absolute inset-0 -translate-x-full animate-[seal-sweep_7s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-foreground/8 to-transparent"
             />
 
-            <div className="relative flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                    <History className="h-4 w-4 text-foreground" />
-                    <span className="text-sm font-medium">DATABASE_URL</span>
-                    <span className="rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+            <div className="relative flex items-center justify-between gap-2 sm:gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                    <History className="h-4 w-4 shrink-0" />
+                    <span className="truncate text-sm font-medium">DATABASE_URL</span>
+                    <span className="hidden shrink-0 rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline">
                         production
                     </span>
                 </div>
-                <span className="font-mono text-[10px] text-muted-foreground">append-only</span>
+                {/* Hidden on the narrowest screens: with the key name and the
+                    environment chip, this label was enough to overflow the card. */}
+                <span className="hidden shrink-0 font-mono text-[10px] text-muted-foreground sm:inline">
+                    append-only
+                </span>
             </div>
 
             <ol className="relative mt-4 space-y-0">

@@ -197,19 +197,19 @@ function Banner({ dashboardHref, signedIn }: { dashboardHref: string; signedIn: 
 
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
                 {/* Centred masthead */}
-                <div className="flex flex-col items-center pt-20 pb-14 text-center sm:pt-28">
+                <div className="flex flex-col items-center pt-16 pb-12 text-center sm:pt-28 sm:pb-14">
                     <div
-                        className="animate-[seal-rise_0.6s_ease-out_both] inline-flex items-center gap-2.5 rounded-full border border-border/60 bg-background/60 px-3.5 py-1 font-mono text-[11px] text-muted-foreground backdrop-blur-sm"
+                        className="animate-[seal-rise_0.6s_ease-out_both] inline-flex max-w-full flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full border border-border/60 bg-background/60 px-3.5 py-1 font-mono text-[11px] text-muted-foreground backdrop-blur-sm"
                         style={{ animationDelay: "0ms" }}
                     >
-                        <span className="h-1.5 w-1.5 rounded-full bg-foreground animate-[seal-pulse_2.4s_ease-in-out_infinite]" />
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground animate-[seal-pulse_2.4s_ease-in-out_infinite]" />
                         <span className="text-foreground/80">all systems nominal</span>
-                        <span className="text-muted-foreground/40">·</span>
-                        envelope encryption
+                        <span className="hidden text-muted-foreground/40 sm:inline">·</span>
+                        <span className="hidden sm:inline">envelope encryption</span>
                     </div>
 
                     <h1
-                        className="animate-[seal-rise_0.8s_ease-out_both] mt-8 max-w-5xl text-5xl font-bold tracking-tight text-balance sm:text-7xl lg:text-8xl"
+                        className="animate-[seal-rise_0.8s_ease-out_both] mt-8 max-w-5xl text-4xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl xl:text-8xl"
                         style={{ animationDelay: "80ms" }}
                     >
                         Secrets with a memory.
@@ -259,12 +259,12 @@ function Banner({ dashboardHref, signedIn }: { dashboardHref: string; signedIn: 
                 </div>
 
                 {/* Full-width instrument band */}
-                <div className="relative pb-20">
+                <div className="relative pb-16 sm:pb-20">
                     <div
                         aria-hidden
                         className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent"
                     />
-                    <div className="grid items-start gap-5 pt-10 lg:grid-cols-[1fr_1.35fr_1fr]">
+                    <div className="grid items-start gap-4 pt-8 sm:pt-10 lg:grid-cols-[1fr_1.35fr_1fr]">
                         <TokenCard className="w-full animate-[seal-rise_0.8s_ease-out_both]" />
                         <HudFrame className="animate-[seal-rise_0.8s_ease-out_both]">
                             <VersionLedger />
@@ -348,7 +348,7 @@ const FEATURES = [
 
 function Capabilities() {
     return (
-        <section id="capabilities" className="py-24">
+        <section id="capabilities" className="py-20 sm:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
                 <SectionHeading
                     index="01"
@@ -413,7 +413,7 @@ const STEPS = [
 
 function Sequence() {
     return (
-        <section id="how" className="border-y border-border/60 bg-muted/15 py-24">
+        <section id="how" className="border-y border-border/60 bg-muted/15 py-20 sm:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
                 <SectionHeading
                     index="02"
@@ -462,7 +462,7 @@ const ACCESS_POINTS = [
 
 function AccessSection() {
     return (
-        <section id="access" className="py-24">
+        <section id="access" className="py-20 sm:py-24">
             <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-2">
                 <div>
                     <SectionHeading
@@ -513,7 +513,7 @@ const CRYPTO_STEPS = [
 
 function Cryptography() {
     return (
-        <section id="cryptography" className="border-y border-border/60 bg-muted/15 py-24">
+        <section id="cryptography" className="border-y border-border/60 bg-muted/15 py-20 sm:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
                 <SectionHeading
                     index="04"
@@ -575,7 +575,7 @@ const FAQS = [
 
 function Faq() {
     return (
-        <section id="faq" className="py-24">
+        <section id="faq" className="py-20 sm:py-24">
             <div className="mx-auto max-w-3xl px-4 sm:px-6">
                 <SectionHeading
                     index="05"
@@ -605,7 +605,7 @@ function Faq() {
 
 function ClosingCta({ dashboardHref, signedIn }: { dashboardHref: string; signedIn: boolean }) {
     return (
-        <section className="relative overflow-hidden border-t border-border/60 py-28">
+        <section className="relative overflow-hidden border-t border-border/60 py-20 sm:py-28">
             <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.06]">
                 <HairlineField />
             </div>

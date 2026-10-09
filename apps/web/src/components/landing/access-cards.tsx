@@ -2,7 +2,7 @@ import { KeyRound, Fingerprint } from "lucide-react";
 import { cn } from "cn";
 
 const CARD_BASE =
-    "rounded-xl border border-border/60 bg-card/80 p-3.5 shadow-xl backdrop-blur-md animate-[seal-float_9s_ease-in-out_infinite]";
+    "rounded-xl border border-border/60 bg-card/80 p-3 shadow-xl backdrop-blur-sm animate-[seal-float_9s_ease-in-out_infinite] sm:p-3.5 sm:backdrop-blur-md";
 
 /** A service token, shown the way the UI presents it: prefix and last four only. */
 export function TokenCard({ className }: { className?: string }) {
@@ -65,10 +65,10 @@ export function AccessMatrix({ className }: { className?: string }) {
             </div>
 
             <div className="mt-3 space-y-1.5">
-                <div className="grid grid-cols-[1fr_repeat(3,auto)] items-center gap-x-2 pb-1">
+                <div className="grid grid-cols-[1fr_repeat(3,auto)] items-center gap-x-1.5 pb-1 sm:gap-x-2">
                     <span />
                     {columns.map((column) => (
-                        <span key={column} className="w-13 text-center font-mono text-[9px] text-muted-foreground/60">
+                        <span key={column} className="w-11 text-center font-mono text-[9px] text-muted-foreground/60 sm:w-13">
                             {column.slice(0, 4)}
                         </span>
                     ))}
@@ -77,7 +77,7 @@ export function AccessMatrix({ className }: { className?: string }) {
                 {ROWS.map((row, index) => (
                     <div
                         key={row.project}
-                        className="animate-[seal-rise_0.5s_ease-out_both] grid grid-cols-[1fr_repeat(3,auto)] items-center gap-x-2"
+                        className="animate-[seal-rise_0.5s_ease-out_both] grid grid-cols-[1fr_repeat(3,auto)] items-center gap-x-1.5 sm:gap-x-2"
                         style={{ animationDelay: `${220 + index * 90}ms` }}
                     >
                         <span className="truncate font-mono text-[10px] text-foreground/80">{row.project}</span>
@@ -87,7 +87,7 @@ export function AccessMatrix({ className }: { className?: string }) {
                             return (
                                 <span
                                     key={column}
-                                    className={`flex w-13 items-center justify-center gap-1 rounded-md border py-1 font-mono text-[9px] ${meta.className}`}
+                                    className={`flex w-11 items-center justify-center gap-1 rounded-md border py-1 font-mono text-[9px] sm:w-13 ${meta.className}`}
                                 >
                                     <span className={`h-1 w-1 rounded-full ${meta.dot}`} />
                                     {meta.label}
