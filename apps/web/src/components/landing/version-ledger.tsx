@@ -15,10 +15,10 @@ const VERSIONS = [
 ];
 
 const OP_META = {
-    create: { icon: PenLine, className: "text-emerald-500/90" },
-    update: { icon: PenLine, className: "text-sky-500/90" },
-    delete: { icon: Trash2, className: "text-destructive/90" },
-    rollback: { icon: RotateCcw, className: "text-primary" },
+    create: { icon: PenLine, className: "text-foreground/70" },
+    update: { icon: PenLine, className: "text-foreground/70" },
+    delete: { icon: Trash2, className: "text-muted-foreground/60" },
+    rollback: { icon: RotateCcw, className: "text-foreground" },
 } as const;
 
 export function VersionLedger({ className }: { className?: string }) {
@@ -32,12 +32,12 @@ export function VersionLedger({ className }: { className?: string }) {
             {/* Slow specular sweep, so the card reads as glass rather than a flat panel. */}
             <span
                 aria-hidden
-                className="pointer-events-none absolute inset-0 -translate-x-full animate-[seal-sweep_7s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-primary/8 to-transparent"
+                className="pointer-events-none absolute inset-0 -translate-x-full animate-[seal-sweep_7s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-foreground/8 to-transparent"
             />
 
             <div className="relative flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                    <History className="h-4 w-4 text-primary" />
+                    <History className="h-4 w-4 text-foreground" />
                     <span className="text-sm font-medium">DATABASE_URL</span>
                     <span className="rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
                         production
@@ -68,7 +68,7 @@ export function VersionLedger({ className }: { className?: string }) {
                                 className={cn(
                                     "relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-background",
                                     entry.highlight
-                                        ? "border-primary/60 ring-2 ring-primary/25"
+                                        ? "border-foreground/60 ring-2 ring-foreground/20"
                                         : "border-border",
                                 )}
                             >
@@ -96,8 +96,8 @@ export function VersionLedger({ className }: { className?: string }) {
                 })}
             </ol>
 
-            <div className="relative mt-4 flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/8 px-3 py-2">
-                <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
+            <div className="relative mt-4 flex items-center gap-2 rounded-lg border border-foreground/20 bg-foreground/5 px-3 py-2">
+                <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-foreground" />
                 <p className="text-[11px] text-muted-foreground">
                     Current value is <span className="font-medium text-foreground">v3</span>, written as{" "}
                     <span className="font-mono text-foreground">v5</span>. Nothing was overwritten.

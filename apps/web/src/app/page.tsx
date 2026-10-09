@@ -22,7 +22,7 @@ export default async function HomePage() {
     const dashboardHref = !session
         ? "/login"
         : session.workspaces && session?.workspaces.length > 0
-          ? `/w/${session?.workspaces[0].slug}`
+          ? `/w/${session?.workspaces[0]?.slug}`
           : "/onboarding";
 
     return <LandingPage dashboardHref={dashboardHref} />;

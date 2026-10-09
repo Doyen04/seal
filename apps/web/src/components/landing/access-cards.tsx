@@ -9,9 +9,9 @@ export function TokenCard({ className }: { className?: string }) {
     return (
         <div className={cn(CARD_BASE, className)}>
             <div className="flex items-center gap-2">
-                <KeyRound className="h-3.5 w-3.5 text-primary" />
+                <KeyRound className="h-3.5 w-3.5 text-foreground/70" />
                 <span className="text-xs font-medium">Service token</span>
-                <span className="ml-auto rounded border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 font-mono text-[9px] text-emerald-500">
+                <span className="ml-auto rounded border border-foreground/25 bg-foreground/10 px-1.5 py-0.5 font-mono text-[9px] text-foreground/80">
                     read-only
                 </span>
             </div>
@@ -22,7 +22,7 @@ export function TokenCard({ className }: { className?: string }) {
             <div className="mt-2.5 flex flex-wrap gap-1.5">
                 <Chip>production</Chip>
                 <Chip>expires in 30d</Chip>
-                <Chip className="border-primary/30 bg-primary/10 text-primary">ip allowlist</Chip>
+                <Chip className="border-foreground/30 bg-foreground/10 text-foreground">ip allowlist</Chip>
             </div>
         </div>
     );
@@ -49,9 +49,9 @@ const ROWS = [
 ];
 
 const LEVELS = {
-    none: { label: "none", className: "border-border/50 bg-muted/20 text-muted-foreground/70", dot: "bg-muted-foreground/40" },
-    read: { label: "read", className: "border-sky-500/30 bg-sky-500/10 text-sky-500", dot: "bg-sky-500" },
-    write: { label: "write", className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-500", dot: "bg-emerald-500" },
+    none: { label: "none", className: "border-border/50 bg-muted/20 text-muted-foreground/50", dot: "bg-foreground/25" },
+    read: { label: "read", className: "border-foreground/25 bg-foreground/5 text-foreground/75", dot: "bg-foreground/60" },
+    write: { label: "write", className: "border-foreground/50 bg-foreground/12 text-foreground", dot: "bg-foreground" },
 } as const;
 
 export function AccessMatrix({ className }: { className?: string }) {
@@ -60,7 +60,7 @@ export function AccessMatrix({ className }: { className?: string }) {
     return (
         <div className={cn(CARD_BASE, "animate-[seal-float_11s_ease-in-out_infinite_0.6s]", className)}>
             <div className="flex items-center gap-2">
-                <Fingerprint className="h-3.5 w-3.5 text-primary" />
+                <Fingerprint className="h-3.5 w-3.5 text-foreground/70" />
                 <span className="text-xs font-medium">ivan@contractor.dev</span>
             </div>
 
