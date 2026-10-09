@@ -79,7 +79,7 @@ export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken 
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label>Project</Label>
                             <Select
                                 value={activeProjectId}
@@ -102,7 +102,7 @@ export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken 
                             </Select>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label>Environment</Label>
                             <Select value={activeEnvId} onValueChange={setSelectedEnvId}>
                                 <SelectTrigger>
@@ -121,7 +121,7 @@ export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken 
                             </p>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="tname">Token Name</Label>
                             <Input
                                 id="tname"
@@ -132,7 +132,7 @@ export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken 
                             />
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="texp">Expires (optional)</Label>
                             <Input
                                 id="texp"
@@ -147,7 +147,7 @@ export function CreateTokenDialog({ open, onOpenChange, projects, onCreateToken 
                             </p>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="ip">IP Allowlist (optional, comma-separated)</Label>
                             <Input
                                 id="ip"

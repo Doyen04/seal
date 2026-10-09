@@ -51,7 +51,7 @@ export function AddSecretDialog({ open, onOpenChange, envName, onAdd }: AddSecre
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="skey">Key Name (uppercase, e.g. STRIPE_API_KEY)</Label>
                             <Input
                                 id="skey"
@@ -62,7 +62,7 @@ export function AddSecretDialog({ open, onOpenChange, envName, onAdd }: AddSecre
                                 required
                             />
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="sval">Secret Value</Label>
                             <Textarea
                                 id="sval"

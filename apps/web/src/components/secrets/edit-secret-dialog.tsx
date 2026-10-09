@@ -47,7 +47,7 @@ export function EditSecretDialog({ open, onOpenChange, target, initialValue, loa
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="eval">Secret Value</Label>
                             <Textarea
                                 id="eval"

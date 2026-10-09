@@ -64,7 +64,7 @@ function LoginForm() {
                 </CardHeader>
                 <form onSubmit={handleSubmit} className="contents">
                     <CardContent className="space-y-4">
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="email">Email address</Label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -80,7 +80,7 @@ function LoginForm() {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
                                 <Link

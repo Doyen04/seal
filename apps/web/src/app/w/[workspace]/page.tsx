@@ -166,7 +166,7 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="space-y-4 py-4">
-                                        <div className="space-y-2">
+                                        <div className="space-y-2.5">
                                             <Label htmlFor="pname">Project Name</Label>
                                             <Input
                                                 id="pname"
@@ -176,7 +176,7 @@ export default function WorkspaceProjectsPage({ params }: { params: Promise<{ wo
                                                 required
                                             />
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-2.5">
                                             <Label htmlFor="pslug">Project Slug</Label>
                                             <Input
                                                 id="pslug"

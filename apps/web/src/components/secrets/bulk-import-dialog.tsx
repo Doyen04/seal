@@ -126,7 +126,7 @@ export function BulkImportDialog({ open, onOpenChange, envName, onImport }: Bulk
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <input
                                 ref={fileInputRef}
                                 type="file"

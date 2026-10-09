@@ -68,7 +68,7 @@ export function InviteMemberDialog({ open, onOpenChange, workspaceName, projects
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="iemail">Email Address</Label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -84,7 +84,7 @@ export function InviteMemberDialog({ open, onOpenChange, workspaceName, projects
                             </div>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="invite-role">Workspace Role</Label>
                             <Select value={role} onValueChange={(val: any) => setRole(val)}>
                                 <SelectTrigger id="invite-role">

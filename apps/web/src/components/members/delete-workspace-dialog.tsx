@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Dialog,
     DialogContent,
@@ -82,17 +84,17 @@ export function DeleteWorkspaceDialog({
                     ))}
                 </ul>
 
-                <div className="space-y-2 pt-2">
-                    <label htmlFor="confirm-workspace" className="text-sm">
+                <div className="space-y-2.5 pt-2">
+                    <Label htmlFor="confirm-workspace" className="text-sm">
                         Type <span className="font-mono font-medium">{expected}</span> to confirm
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                         id="confirm-workspace"
                         value={confirmation}
                         onChange={(e) => setConfirmation(e.target.value)}
                         placeholder={expected}
                         autoComplete="off"
-                        className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                        aria-invalid={confirmation.length > 0 && !matches}
                     />
                 </div>
 

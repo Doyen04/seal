@@ -65,7 +65,7 @@ export default function OnboardingPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="space-y-2">
+                            <div className="space-y-2.5">
                                 <Label htmlFor="name">Workspace Name</Label>
                                 <Input
                                     id="name"
@@ -76,7 +76,7 @@ export default function OnboardingPage() {
                                 />
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-2.5">
                                 <Label htmlFor="slug">Workspace Slug</Label>
                                 <div className="flex items-center space-x-2">
                                     <span className="text-xs text-muted-foreground font-mono bg-muted px-2.5 py-2 rounded-md border border-border">

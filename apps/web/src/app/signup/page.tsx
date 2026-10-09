@@ -83,7 +83,7 @@ export default function SignupPage() {
                     </CardHeader>
                     <form onSubmit={handleSubmit} className="contents">
                         <CardContent className="space-y-4">
-                            <div className="space-y-2">
+                            <div className="space-y-2.5">
                                 <Label htmlFor="name">Full Name</Label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -99,7 +99,7 @@ export default function SignupPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-2.5">
                                 <Label htmlFor="email">Email address</Label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -115,7 +115,7 @@ export default function SignupPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-2.5">
                                 <Label htmlFor="password">Password (min 10 characters)</Label>
                                 <div className="relative">
                                     <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

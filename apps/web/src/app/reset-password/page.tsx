@@ -65,7 +65,7 @@ function ResetPasswordForm() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {!queryToken && (
-                            <div className="space-y-2">
+                            <div className="space-y-2.5">
                                 <Label htmlFor="token">Reset Token</Label>
                                 <Input
                                     id="token"
@@ -77,7 +77,7 @@ function ResetPasswordForm() {
                             </div>
                         )}
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Label htmlFor="password">New Password (min 10 chars)</Label>
                             <div className="relative">
                                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
