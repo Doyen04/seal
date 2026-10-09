@@ -85,7 +85,7 @@ export function DeleteWorkspaceDialog({
                 </ul>
 
                 <div className="space-y-2.5 pt-2">
-                    <Label htmlFor="confirm-workspace" className="text-sm">
+                    <Label htmlFor="confirm-workspace">
                         Type <span className="font-mono font-medium">{expected}</span> to confirm
                     </Label>
                     <Input
