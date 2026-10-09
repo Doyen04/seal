@@ -15,11 +15,11 @@ import { SealMark } from "./seal-mark";
 import { VersionLedger } from "./version-ledger";
 import { AccessMatrix, TokenCard } from "./access-cards";
 import {
-    EnvelopeIllustration,
+    EnvironmentPlanesIllustration,
     HairlineField,
-    HistoryIllustration,
-    TopologyIllustration,
-    VaultIllustration,
+    KeyWrappingIllustration,
+    VersionDeckIllustration,
+    WaxSealIllustration,
 } from "./illustrations";
 
 /**
@@ -164,12 +164,12 @@ function Banner({ dashboardHref, signedIn }: { dashboardHref: string; signedIn: 
                 <HairlineField />
             </div>
 
-            {/* Vault illustration, large and faint, centred behind the type */}
+            {/* Wax seal, large and faint, centred behind the masthead */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[130vh] w-[130vh] -translate-x-1/2 -translate-y-1/2 animate-[seal-drift_30s_ease-in-out_infinite] text-foreground opacity-[0.07]"
+                className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[150vh] w-[150vh] -translate-x-1/2 -translate-y-1/2 animate-[seal-drift_34s_ease-in-out_infinite]"
             >
-                <VaultIllustration />
+                <WaxSealIllustration className="opacity-[0.12]" />
             </div>
 
             {/* Instrument grid */}
@@ -358,8 +358,8 @@ function Capabilities() {
                 />
 
                 <div className="mt-6 flex justify-center">
-                    <div className="w-full max-w-3xl opacity-70">
-                        <HistoryIllustration />
+                    <div className="w-full max-w-2xl opacity-80">
+                        <VersionDeckIllustration />
                     </div>
                 </div>
 
@@ -485,7 +485,7 @@ function AccessSection() {
                 <div className="relative">
                     <HudFrame>
                         <div className="rounded-xl border border-border/60 bg-card/40 p-4 backdrop-blur-sm">
-                            <TopologyIllustration />
+                            <EnvironmentPlanesIllustration />
                         </div>
                     </HudFrame>
                 </div>
@@ -523,8 +523,8 @@ function Cryptography() {
                 />
 
                 <div className="mt-10 flex justify-center">
-                    <div className="w-full max-w-4xl opacity-80">
-                        <EnvelopeIllustration />
+                    <div className="w-full max-w-xl opacity-90">
+                        <KeyWrappingIllustration />
                     </div>
                 </div>
 
