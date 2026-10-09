@@ -1,14 +1,13 @@
 import { KeyRound, Fingerprint } from "lucide-react";
+import { cn } from "cn";
+
+const CARD_BASE =
+    "rounded-xl border border-border/60 bg-card/80 p-3.5 shadow-xl backdrop-blur-md animate-[seal-float_9s_ease-in-out_infinite]";
 
 /** A service token, shown the way the UI presents it: prefix and last four only. */
 export function TokenCard({ className }: { className?: string }) {
     return (
-        <div
-            className={
-                className ??
-                "animate-[seal-float_9s_ease-in-out_infinite] rounded-xl border border-border/60 bg-card/80 p-3.5 shadow-xl backdrop-blur-md"
-            }
-        >
+        <div className={cn(CARD_BASE, className)}>
             <div className="flex items-center gap-2">
                 <KeyRound className="h-3.5 w-3.5 text-primary" />
                 <span className="text-xs font-medium">Service token</span>
@@ -59,12 +58,7 @@ export function AccessMatrix({ className }: { className?: string }) {
     const columns = ["Development", "Staging", "Production"];
 
     return (
-        <div
-            className={
-                className ??
-                "animate-[seal-float_11s_ease-in-out_infinite_0.6s] rounded-xl border border-border/60 bg-card/80 p-3.5 shadow-xl backdrop-blur-md"
-            }
-        >
+        <div className={cn(CARD_BASE, "animate-[seal-float_11s_ease-in-out_infinite_0.6s]", className)}>
             <div className="flex items-center gap-2">
                 <Fingerprint className="h-3.5 w-3.5 text-primary" />
                 <span className="text-xs font-medium">ivan@contractor.dev</span>
